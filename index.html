@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#F3EDE4" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="倩崽工作台" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <title>倩崽工作台</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- 侧边导航 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">✿</div>
+    <nav class="nav">
+      <button class="nav-item active" data-nav="overview"><span class="nav-ico">📊</span><span class="nav-label">今日总览</span></button>
+      <button class="nav-item" data-nav="reading"><span class="nav-ico">📖</span><span class="nav-label">每月阅读</span></button>
+      <button class="nav-item" data-nav="exercise"><span class="nav-ico">💪</span><span class="nav-label">锻炼身体</span></button>
+      <button class="nav-item" data-nav="meal"><span class="nav-ico">🍱</span><span class="nav-label">好好吃饭</span></button>
+      <button class="nav-item" data-nav="weight"><span class="nav-ico">⚖️</span><span class="nav-label">体重管理</span></button>
+      <button class="nav-item" data-nav="finance"><span class="nav-ico">💰</span><span class="nav-label">理财管理</span></button>
+      <button class="nav-item" data-nav="todo"><span class="nav-ico">💼</span><span class="nav-label">待办计划</span></button>
+      <button class="nav-item" data-nav="travel"><span class="nav-ico">🗺️</span><span class="nav-label">旅游记录</span></button>
+      <button class="nav-item" data-nav="chores"><span class="nav-ico">🧹</span><span class="nav-label">家务排班</span></button>
+    </nav>
+  </aside>
+
+  <!-- 主内容区 -->
+  <main class="content">
+    <header class="topbar">
+      <h1 class="page-title" id="pageTitle">今日总览</h1>
+      <div class="cloud-pill" id="cloudPill" title="点击：立即同步 / 设置云端同步">本地模式</div>
+      <div class="clock" id="clock">—</div>
+    </header>
+
+    <div class="panels">
+      <!-- 模块0：今日总览 -->
+      <section class="panel active" data-panel="overview">
+        <div class="card overview-greet" id="ovGreet">你好，倩崽</div>
+        <div class="ov-grid" id="ovGrid"></div>
+        <div class="card ov-quick">
+          <div class="ov-quick-title">快捷入口</div>
+          <div class="ov-quick-links">
+            <button class="quick-link" data-nav="reading">📖 去记录阅读</button>
+            <button class="quick-link" data-nav="exercise">💪 去记录锻炼</button>
+            <button class="quick-link" data-nav="plan">📝 去规划今日</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 模块1：每月阅读（私人阅读手帐） -->
+      <section class="panel" data-panel="reading">
+        <!-- 顶部统计摘要 -->
+        <div class="card rd-summary" id="rdSummary"></div>
+
+        <!-- Tab 导航 -->
+        <div class="rd-tabs" id="rdTabs">
+          <button class="active" data-rdtab="shelf">📚 书架</button>
+          <button data-rdtab="notes">📝 笔记</button>
+        </div>
+
+        <!-- Tab 1：书架 -->
+        <div class="card rd-pane" data-rdpane="shelf" id="rdShelfPane">
+          <div class="list-toolbar">
+            <div class="seg" id="rdViewSeg">
+              <button class="active" data-rview="wishlist">想读</button>
+              <button data-rview="reading">在读</button>
+              <button data-rview="done">读完</button>
+            </div>
+          </div>
+          <div class="rd-grid" id="rdGrid"></div>
+        </div>
+
+        <!-- Tab 2：笔记 -->
+        <div class="card rd-pane" data-rdpane="notes" id="rdNotesPane" hidden>
+          <div class="list-toolbar">
+            <div class="seg" id="rdNoteViewSeg">
+              <button class="active" data-nview="time">按时间</button>
+              <button data-nview="book">按书籍</button>
+            </div>
+          </div>
+          <div id="rdNotesList"></div>
+        </div>
+
+        <!-- 书籍详情（当前面板内展开） -->
+        <div class="card" id="rdDetail" hidden></div>
+
+        <!-- 悬浮快速添加 -->
+        <button class="fab" id="rdFab" title="添加书籍">+</button>
+      </section>
+
+      <!-- 模块2：锻炼身体（运动记录助手） -->
+      <section class="panel" data-panel="exercise">
+        <!-- 顶部摘要卡片 -->
+        <div class="card rd-summary ex-summary" id="exSummary"></div>
+        <!-- 今日状态条 -->
+        <div class="card ex-today" id="exToday"></div>
+        <!-- 统计 -->
+        <div class="card" id="exStatPane">
+          <div class="seg" id="exRangeSeg" style="margin-bottom:12px">
+            <button class="active" data-range="week">本周</button>
+            <button data-range="month">本月</button>
+            <button data-range="year">本年</button>
+            <button data-range="all">全部</button>
+          </div>
+          <div id="exStats"></div>
+        </div>
+        <!-- 悬浮快速记录 -->
+        <button class="fab" id="exFab" title="记录运动">+</button>
+      </section>
+
+      <!-- 模块3：好好吃饭 -->
+      <section class="panel" data-panel="meal">
+        <!-- 顶部打卡状态条 -->
+        <div class="card meal-checkin" id="mealCheckin"></div>
+        <!-- 模式 Tab -->
+        <div class="w-tabs" id="mealTabs">
+          <button class="active" data-mtab="diary">📸 美食日记</button>
+          <button data-mtab="nutrition">📊 营养追踪</button>
+          <button data-mtab="check">✅ 轻打卡</button>
+        </div>
+
+        <!-- 模式一：美食日记 -->
+        <div class="card meal-pane" data-mpane="diary" id="mealDiaryPane">
+          <div class="list-toolbar">
+            <div class="seg" id="diaryViewSeg">
+              <button class="active" data-dview="wall"><span class="seg-ico">🍱</span>照片墙</button>
+              <button data-dview="timeline"><span class="seg-ico">📋</span>时间线</button>
+              <button data-dview="calendar"><span class="seg-ico">📅</span>日历墙</button>
+            </div>
+          </div>
+          <div class="chart" id="diaryContent"></div>
+        </div>
+
+        <!-- 模式二：营养追踪 -->
+        <div class="card meal-pane" data-mpane="nutrition" id="mealNutriPane" hidden>
+          <div class="meal-nutri-head">
+            <div class="meal-kcal" id="nutriKcal"></div>
+            <button class="btn ghost sm" id="nutriTargetBtn">⚙️ 热量目标</button>
+          </div>
+          <div class="fin-report-grid">
+            <div class="report-card chart">
+              <div class="rep-title">今日营养素占比</div>
+              <div id="nutriDonut"></div>
+            </div>
+            <div class="report-card chart">
+              <div class="rep-title">近 7 日热量趋势</div>
+              <div id="nutriTrend"></div>
+            </div>
+          </div>
+          <div class="report-card chart" style="margin-top:16px">
+            <div class="rep-title">本月按餐别分布</div>
+            <div id="nutriByMeal"></div>
+          </div>
+        </div>
+
+        <!-- 模式三：轻打卡 -->
+        <div class="card meal-pane" data-mpane="check" id="mealCheckPane" hidden>
+          <div class="list-toolbar">
+            <div class="seg" id="checkViewSeg">
+              <button class="active" data-cview="today"><span class="seg-ico">✅</span>今日打卡</button>
+              <button data-cview="calendar"><span class="seg-ico">📅</span>月度日历</button>
+            </div>
+            <span class="muted-tip" id="checkTip"></span>
+          </div>
+          <div id="checkContent"></div>
+        </div>
+
+        <!-- 悬浮快速记录按钮 -->
+        <button class="fab" id="mealFab" title="记录一餐">+</button>
+      </section>
+
+      <!-- 模块4：体重管理 -->
+      <section class="panel" data-panel="weight">
+        <div class="card w-summary" id="wSummary"></div>
+        <div class="card w-badges" id="wBadges"></div>
+        <div class="w-tabs" id="wTabs">
+          <button class="active" data-wtab="trend">📈 趋势图</button>
+          <button data-wtab="list">📋 列表</button>
+        </div>
+        <div class="card w-tools">
+          <button class="btn ghost sm" id="wExportBtn" type="button">⬇ 导出CSV</button>
+          <span class="w-selinfo" id="wSelInfo"></span>
+        </div>
+        <div class="w-pane" data-wpane="trend">
+          <div class="seg" id="wTrendSeg">
+            <button data-range="week">周</button>
+            <button data-range="month" class="active">月</button>
+            <button data-range="quarter">季</button>
+            <button data-range="year">年</button>
+            <button data-range="all">全部</button>
+          </div>
+          <div id="wChart"></div>
+        </div>
+        <div class="w-pane" data-wpane="list" hidden>
+          <div class="list" id="weightList"></div>
+        </div>
+        <button class="fab" id="wFab" title="记录体重">+</button>
+      </section>
+
+      <!-- 模块5：理财管理 -->
+      <section class="panel" data-panel="finance">
+        <!-- 顶部数据卡片 -->
+        <div class="fin-cards" id="finCards"></div>
+
+        <!-- Tab 导航 -->
+        <div class="fin-tabs">
+          <button class="fin-tab active" data-fin-tab="flow">📊 流水</button>
+          <button class="fin-tab" data-fin-tab="accounts">📂 账户</button>
+          <button class="fin-tab" data-fin-tab="budget">🎯 预算</button>
+          <button class="fin-tab" data-fin-tab="report">📈 报表</button>
+        </div>
+
+        <div class="fin-tab-body">
+          <!-- Tab 1：流水 -->
+          <div class="fin-tab-pane active" data-fin-pane="flow">
+            <div class="fin-pane-head" style="margin-bottom:14px">
+              <span class="fin-summary">记账流水</span>
+              <button class="btn ghost sm" id="finClearBtn">🗑 清空记账</button>
+            </div>
+            <div class="card fin-filters">
+              <div class="seg" id="finRangeSeg">
+                <button data-range="today">今天</button>
+                <button data-range="week">本周</button>
+                <button class="active" data-range="month">本月</button>
+                <button data-range="custom">自定义</button>
+              </div>
+              <input type="date" id="finRangeStart" hidden />
+              <input type="date" id="finRangeEnd" hidden />
+              <select id="finFilterType">
+                <option value="all">全部类型</option>
+                <option value="收入">收入</option>
+                <option value="支出">支出</option>
+                <option value="转账">转账</option>
+              </select>
+              <select id="finFilterCat"><option value="all">全部分类</option></select>
+              <select id="finFilterAcct"><option value="all">全部账户</option></select>
+            </div>
+            <div class="fin-flow-layout">
+              <div class="card fin-cal" id="finCal"></div>
+              <div class="list" id="financeList"></div>
+            </div>
+            <button class="fab" id="finAddBtn" title="记一笔">+</button>
+          </div>
+
+          <!-- Tab 2：账户 -->
+          <div class="fin-tab-pane" data-fin-pane="accounts">
+            <div class="card fin-summary" id="finAcctSummary"></div>
+            <div class="fin-pane-head">
+              <button class="btn primary sm" id="finAddAcctBtn">+ 添加账户</button>
+            </div>
+            <div class="fin-acct-grid" id="finAcctGrid"></div>
+          </div>
+
+          <!-- Tab 3：预算 -->
+          <div class="fin-tab-pane" data-fin-pane="budget">
+            <div class="card fin-summary" id="finBudSummary"></div>
+            <div class="fin-pane-head">
+              <select id="budCycle">
+                <option value="月度">月度</option>
+                <option value="年度">年度</option>
+              </select>
+              <button class="btn primary sm" id="finAddBudBtn">+ 添加预算</button>
+            </div>
+            <div class="list" id="finBudList"></div>
+          </div>
+
+          <!-- Tab 4：报表 -->
+          <div class="fin-tab-pane" data-fin-pane="report">
+            <div class="card fin-filters">
+              <div class="seg" id="repRangeSeg">
+                <button data-range="month" class="active">本月</button>
+                <button data-range="quarter">本季度</button>
+                <button data-range="year">本年</button>
+                <button data-range="custom">自定义</button>
+              </div>
+              <input type="date" id="repRangeStart" hidden />
+              <input type="date" id="repRangeEnd" hidden />
+              <select id="repFilterAcct"><option value="all">全部账户</option></select>
+            </div>
+            <div class="fin-report-grid" id="finReport"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 模块7：待办计划 -->
+      <section class="panel" data-panel="todo">
+        <div class="reminder-banner" id="todoReminder" hidden></div>
+        <div class="card form-card">
+          <div class="form-head"><span id="tFormTitle">添加待办计划</span></div>
+          <div class="form-grid">
+            <label>截止日期 *<input type="date" id="t-due" /></label>
+            <label>优先级 *
+              <select id="t-priority">
+                <option value="紧急重要">紧急重要</option>
+                <option value="重要不紧急" selected>重要不紧急</option>
+                <option value="紧急不重要">紧急不重要</option>
+                <option value="不重要不紧急">不重要不紧急</option>
+              </select>
+            </label>
+            <label>事项内容 *<input type="text" id="t-content" placeholder="任务内容" /></label>
+            <label>所属项目<input type="text" id="t-project" placeholder="如 产品V2.0" /></label>
+            <label>状态 *
+              <select id="t-status">
+                <option value="待办" selected>待办</option>
+                <option value="进行中">进行中</option>
+                <option value="已完成">已完成</option>
+                <option value="已延期">已延期</option>
+              </select>
+            </label>
+            <label class="full"></label>
+          </div>
+          <div class="form-actions">
+            <button class="btn primary" id="t-submit">添加</button>
+            <button class="btn ghost" id="t-cancel" hidden>取消</button>
+          </div>
+        </div>
+        <div class="list-toolbar">
+          <label class="toggle"><input type="checkbox" id="tShowArchived" /> 显示已归档</label>
+        </div>
+        <div class="list" id="todoList"></div>
+      </section>
+
+      <!-- 模块8：旅游记录 -->
+      <section class="panel" data-panel="travel">
+        <div class="card form-card">
+          <div class="form-head"><span id="trFormTitle">添加旅行记录</span></div>
+          <div class="form-grid">
+            <label>目的地 *<input type="text" id="tr-dest" placeholder="如 京都" /></label>
+            <label>出发日期 *<input type="date" id="tr-start" /></label>
+            <label>结束日期 *<input type="date" id="tr-end" /></label>
+            <label>同行伙伴<input type="text" id="tr-companion" placeholder="谁一起" /></label>
+            <label>总花费(元)<input type="number" id="tr-cost" min="0" step="0.01" placeholder="总花费" /></label>
+            <label class="full">游记 / 心情<textarea id="tr-note" rows="2" placeholder="写点什么"></textarea></label>
+          </div>
+          <div class="form-actions">
+            <button class="btn primary" id="tr-submit">添加</button>
+            <button class="btn ghost" id="tr-cancel" hidden>取消</button>
+          </div>
+        </div>
+        <div class="list" id="travelList"></div>
+      </section>
+
+      <!-- 模块10：家务排班 -->
+      <section class="panel" data-panel="chores">
+        <div id="choresMain"></div>
+      </section>
+    </div>
+
+    <!-- 底部导出/导入 -->
+    <footer class="footer">
+      <button class="btn ghost" id="exportBtn">⬇ 导出数据</button>
+      <button class="btn ghost" id="importBtn">⬆ 导入数据</button>
+      <input type="file" id="importFile" accept="application/json" hidden />
+    </footer>
+  </main>
+
+    <!-- 通用模态框（记账 / 账户 / 预算） -->
+    <div class="modal-overlay" id="modalOverlay" hidden>
+      <div class="modal-card" id="modalCard">
+        <div class="modal-head">
+          <span id="modalTitle"></span>
+          <button class="icon-btn" id="modalClose" title="关闭">✕</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+      </div>
+    </div>
+
+    <div class="toast-wrap" id="toastWrap"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>

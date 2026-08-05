@@ -1,0 +1,10 @@
+# 项目私有记忆，不入库
+.workbuddy/
+
+# CloudStudio 临时部署副本，源文件在根目录
+deploy/
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
+*.log

@@ -1,0 +1,15 @@
+{
+  "name": "倩崽工作台",
+  "short_name": "倩崽台",
+  "description": "个人工作台：阅读、运动、饮食、体重、理财、计划、清单、旅游、家务排班",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F3EDE4",
+  "theme_color": "#F3EDE4",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
