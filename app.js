@@ -290,6 +290,27 @@
   };
   var FIN_COLORS = ['#D4B8A8', '#B7C4B1', '#A7B8C9', '#E0C8A0', '#C9A9B0', '#9FB8B0', '#D8BFA8', '#B0A9C4', '#C2B89C', '#A9C0C4', '#CDB6C9'];
 
+  // 二级分类图标映射（emoji）
+  var CAT_ICONS = {
+    '食品酒水': { '伙食费':'🍚','早餐':'🍳','中餐':'🍱','晚餐':'🍜','水果':'🍎','零食':'🍿','买菜':'🥬','柴米油盐':'🧂','饮料酒水':'🍷','外出美食':'👨‍🍳' },
+    '居家生活': { '房租':'🏠','物业费':'🏢','电费':'💡','水费':'💧','燃气费':'🔥','电视费':'📺','维修费':'🔧','快递费':'📦' },
+    '交流通讯': { '手机话费':'📱','网费':'🌐','座机费':'☎️' },
+    '休闲娱乐': { '彩票':'🎰','棋牌':'🃏','麻将':'🀄','话剧':'🎭','K歌':'🎤','网游':'🎮','运动':'⚽','电影':'🎬','演唱会':'🎵','温泉洗浴':'♨️','其他娱乐':'🎪','聚会':'🥳' },
+    '人情费用': { '红包':'🧧','白事':'🕯️','升学':'🎓','满月':'👶','寿辰':'🎂','婚嫁':'💒','乔迁':'🏡','孝敬长辈':'👴','请客':'🍽️' },
+    '宝宝费用': { '妈妈用品':'🤰','医疗护理':'💊','宝宝用品':'🍼','宝宝教育':'📚','宝宝食品':'🍼','宝宝其他':'🧸' },
+    '出差旅游': { '餐饮费':'🍽️','交通费':'🚗','住宿费':'🏨','娱乐费':'🎡','出行用品':'🧳','其他消费':'💸' },
+    '行车交通': { '地铁':'🚇','公交':'🚌','保养':'🔧','保险':'🛡️','违章罚款':'⚠️','停车':'🅿️','维修':'🔧','驾照':'🪙','自行车':'🚲','加油':'⛽','租车':'🚗','飞机':'✈️','火车':'🚅','打车':'🚕' },
+    '购物消费': { '日常用品':'🛒','电子数码':'💻','美妆护肤':'💄','洗护用品':'🧴','衣裤鞋帽':'👗','超市购物':'🏪','书报杂志':'📖','运动器械':'🏋️','厨房用品':'🍳','家居饰品':'🏠','珠宝首饰':'💎','宠物支出':'🐾','办公用品':'📝','家具家电':'🛋️','清洁用品':'🧹','汽车用品':'🚙','家用纺织':'🛏️' },
+    '医疗教育': { '治疗费':'💉','住院费':'🏥','护理费':'🩹','学费':'🎓' },
+    '其他杂项': { '烂账损失':'❌','意外丢失':'😵','其他支出':'📋' },
+    '装修费用': { '装修材料':'🧱','装修工人':'👷','家电家具':'🛋️','装修装饰':'🎨','装修其他':'📦' },
+    '金融保险': { '车贷手续':'📝','汽车首付':'🚗','车贷':'💳','投资亏损':'📉','人身保险':'🛡️','按揭还款':'🏦','银行手续':'🏧','利息支出':'💸','房屋首付':'🏠','房贷':'🏠','房贷手续':'📝','税费':'📋','赔偿罚款':'⚠️','消费税收':'📊' },
+    // 收入分类
+    '职业收入': { '加班收入':'💰','利息收入':'📈','工资收入':'💵','兼职收入':'🤝','理财收入':'📊','奖金收入':'🏆' },
+    '人情收礼': { '所收红包':'🧧','满月收礼':'👶','白事收礼':'🕯️','婚嫁收礼':'💒','乔迁收礼':'🏡','升学收礼':'🎓','寿辰收礼':'🎂' },
+    '其他收入': { '奖金收入':'🏆','中奖收入':'🎰','经营所得':'💼','意外来钱':'🎁' }
+  };
+
   // 返回 [{name, children:[...], isPreset}]（预设在前，自定义在后）
   function getCats(kind) {
     var preset = kind === 'expense' ? EXPENSE_CATS : INCOME_CATS;
@@ -2548,17 +2569,51 @@
         '<label>转入账户<select id="tx-to">' + acctOptions(rec ? rec.toAccount : '') + '</select></label>';
     } else {
       var kind = type === '收入' ? 'income' : 'expense';
-      var top = rec ? rec.catTop : getCats(kind)[0].name;
-      var sub = rec ? rec.catSub : getCats(kind)[0].children[0];
-      box.innerHTML = '<label>一级分类<select id="tx-top">' + catTopOptions(kind, top) + '</select></label>' +
-        '<label>二级分类<select id="tx-sub">' + catSubOptions(kind, top, sub) + '</select></label>' +
-        '<label>账户<select id="tx-account">' + acctOptions(rec ? rec.account : '') + '</select></label>' +
+      var cats = getCats(kind);
+      var defTop = cats[0] ? cats[0].name : '';
+      var defSub = (cats[0] && cats[0].children.length) ? cats[0].children[0] : defTop;
+      var selTop = rec ? rec.catTop : defTop;
+      var selSub = rec ? rec.catSub : defSub;
+
+      // 构建图标网格
+      var groupsHtml = '';
+      cats.forEach(function (cg) {
+        var icons = CAT_ICONS[cg.name] || {};
+        var itemsHtml = cg.children.map(function (sub) {
+          var ico = icons[sub] || '📌';
+          var isSel = (cg.name === selTop && sub === selSub) ? ' sel' : '';
+          return '<div class="cat-item' + isSel + '" data-top="' + esc(cg.name) + '" data-sub="' + esc(sub) + '">' +
+            '<span class="cat-icon">' + ico + '</span><span class="cat-label">' + esc(sub) + '</span></div>';
+        }).join('');
+        if (itemsHtml) groupsHtml += '<div class="cat-group-title">' + esc(cg.name) + '</div><div class="cat-grid">' + itemsHtml + '</div>';
+      });
+
+      box.innerHTML =
+        '<input type="hidden" id="tx-top" value="' + esc(selTop) + '"/>' +
+        '<input type="hidden" id="tx-sub" value="' + esc(selSub) + '"/>' +
+        '<div class="cat-picker">' + groupsHtml + '</div>' +
+        '<label style="margin-top:10px">账户<select id="tx-account">' + acctOptions(rec ? rec.account : '') + '</select></label>' +
         '<button class="link-btn" id="txAddCatBtn" type="button">＋ 新增分类</button>' +
         '<div id="txCatCustom" hidden><div class="grid-2">' +
         '<label>新一级分类<input id="txNewTop" placeholder="可选"/></label>' +
         '<label>新二级分类<input id="txNewSub" placeholder="可选"/></label></div>' +
         '<button class="btn primary sm" id="txCatSave" type="button" style="margin-top:8px">添加</button></div>';
-      $('tx-top').onchange = function () { $('tx-sub').innerHTML = catSubOptions(kind, this.value, ''); };
+
+      // 点击图标项
+      Array.prototype.forEach.call(box.querySelectorAll('.cat-item'), function (item) {
+        item.onclick = function () {
+          box.querySelectorAll('.cat-item').forEach(function (x) { x.classList.remove('sel'); });
+          item.classList.add('sel');
+          $('tx-top').value = item.getAttribute('data-top');
+          $('tx-sub').value = item.getAttribute('data-sub');
+        };
+      });
+      // 滚动到已选项
+      setTimeout(function () {
+        var selEl = box.querySelector('.cat-item.sel');
+        if (selEl) selEl.scrollIntoView({ block: 'center', behavior: 'auto' });
+      }, 50);
+
       $('txAddCatBtn').onclick = function () { $('txCatCustom').hidden = !$('txCatCustom').hidden; };
       $('txCatSave').onclick = function () {
         var nt = $('txNewTop').value.trim(), ns = $('txNewSub').value.trim();
@@ -2567,8 +2622,11 @@
         if (nt) state.finCats.push({ kind: kind, name: nt, parent: '' });
         if (ns) state.finCats.push({ kind: kind, name: ns, parent: nt || $('tx-top').value });
         saveState();
-        $('tx-top').innerHTML = catTopOptions(kind, nt || $('tx-top').value);
-        $('tx-sub').innerHTML = catSubOptions(kind, nt || $('tx-top').value, ns);
+        // 刷新网格
+        var newTop = nt || $('tx-top').value;
+        $('tx-top').value = newTop;
+        if (ns) { $('tx-sub').value = ns; }
+        renderTxDyn(type, { catTop: newTop, catSub: ns || $('tx-sub').value, account: $('tx-account').value });
         $('txNewTop').value = ''; $('txNewSub').value = ''; $('txCatCustom').hidden = true;
         toast('分类已添加', 'ok');
       };
