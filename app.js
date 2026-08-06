@@ -2258,8 +2258,6 @@
 
   /* ============ 模块5：理财管理（流水 / 账户 / 预算 / 报表） ============ */
   var financeTab = 'flow';
-  var finCalMonth = null;
-  var finSelDate = null;
   var finFilter = { range: 'month', type: 'all', cat: 'all', acct: 'all' };
   var repFilter = { range: 'month', acct: 'all' };
 
@@ -2275,7 +2273,6 @@
   }
 
   function renderFinance() {
-    finCalMonth = finCalMonth || TODAY.slice(0, 7);
     renderFinCards();
     // 同步 Tab 显示
     document.querySelectorAll('[data-fin-tab]').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-fin-tab') === financeTab); });
@@ -2331,16 +2328,14 @@
         if (t.txType === '转账') { if (t.fromAccount !== finFilter.acct && t.toAccount !== finFilter.acct) return false; }
         else if (t.account !== finFilter.acct) return false;
       }
-      if (finSelDate && t.date !== finSelDate) return false;
       return true;
     }).sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
   }
   function renderFlow() {
     populateFinFilters();
-    renderCalendar();
     var list = flowTxs();
     var box = $('financeList');
-    if (!list.length) { box.innerHTML = emptyState('💸', finSelDate ? (finSelDate + ' 没有记账记录') : '还没有记账记录，点右下角“记一笔”'); return; }
+    if (!list.length) { box.innerHTML = emptyState('💸', '还没有记账记录，点右下角“记一笔”'); return; }
     box.innerHTML = list.map(function (t) {
       var cls = t.txType === '收入' ? 'amount-in' : t.txType === '支出' ? 'amount-out' : 'amount-trans';
       var sign = t.txType === '收入' ? '+' : t.txType === '支出' ? '-' : '';
@@ -2357,33 +2352,6 @@
         '<div class="ops"><button class="icon-btn" data-act="edit" data-mod="tx" title="编辑">✏️</button>' +
         '<button class="icon-btn" data-act="del" data-mod="tx" title="删除">🗑️</button></div></div>';
     }).join('');
-  }
-  function renderCalendar() {
-    if (!finCalMonth) finCalMonth = TODAY.slice(0, 7);
-    var y = +finCalMonth.slice(0, 4), m = +finCalMonth.slice(5, 7);
-    var first = new Date(y, m - 1, 1);
-    var startDow = first.getDay();
-    var daysInMonth = new Date(y, m, 0).getDate();
-    var txDays = {};
-    state.finance.forEach(function (t) { if (t.date.indexOf(finCalMonth) === 0) txDays[t.date] = 1; });
-    var html = '<div class="cal-head"><button class="cal-nav" id="calPrev">‹</button><span class="cal-title">' + y + '年' + m + '月</span><button class="cal-nav" id="calNext">›</button></div>';
-    html += '<div class="cal-grid">';
-    ['日', '一', '二', '三', '四', '五', '六'].forEach(function (d) { html += '<div class="cal-dow">' + d + '</div>'; });
-    for (var i = 0; i < startDow; i++) html += '<div class="cal-cell other"></div>';
-    for (var d = 1; d <= daysInMonth; d++) {
-      var ds = finCalMonth + '-' + (d < 10 ? '0' + d : d);
-      var cls = 'cal-cell' + (ds === TODAY ? ' today' : '') + (ds === finSelDate ? ' sel' : '');
-      html += '<div class="' + cls + '" data-cal="' + ds + '">' + d + (txDays[ds] ? '<span class="cal-dot"></span>' : '') + '</div>';
-    }
-    html += '</div>';
-    if (finSelDate) html += '<div style="text-align:center;margin-top:8px"><button class="link-btn" id="calClear">显示全部日期</button></div>';
-    $('finCal').innerHTML = html;
-    $('calPrev').onclick = function () { var p = new Date(y, m - 2, 1); finCalMonth = fmtDate(p).slice(0, 7); renderCalendar(); };
-    $('calNext').onclick = function () { var p = new Date(y, m, 1); finCalMonth = fmtDate(p).slice(0, 7); renderCalendar(); };
-    if ($('calClear')) $('calClear').onclick = function () { finSelDate = null; renderFlow(); };
-    Array.prototype.forEach.call($('finCal').querySelectorAll('[data-cal]'), function (c) {
-      c.onclick = function () { var d = c.getAttribute('data-cal'); finSelDate = (finSelDate === d) ? null : d; renderFlow(); };
-    });
   }
 
   /* ---- Tab 2：账户 ---- */
@@ -2410,7 +2378,6 @@
       card.onclick = function (e) {
         if (e.target.closest('[data-act]')) return;
         finFilter.acct = card.getAttribute('data-id');
-        finSelDate = null;
         financeTab = 'flow'; renderFinance();
       };
     });

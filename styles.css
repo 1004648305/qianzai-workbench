@@ -242,8 +242,6 @@ body{
 .reminder-banner .rem-hint{ font-size:11px; color:#A88A5C; }
 @media (min-width:681px){
   .reminder-banner .rem-list{ max-width:680px; }
-  /* 桌面端：日历固定，手机端随页上移 */
-  .fin-cal{ position:sticky; top:84px; z-index:5; }
 }
 
 /* ---------- 分段切换按钮（图标在上、文字在下） ---------- */
@@ -369,24 +367,7 @@ body{
 
 /* 段控件（桌面横排胶囊样式见 min-width:681px 媒体查询，手机端为竖排均分） */
 
-.fin-flow-layout{ display:grid; grid-template-columns:300px 1fr; gap:16px; align-items:start; }
-@media (max-width:900px){ .fin-flow-layout{ grid-template-columns:1fr; } .fin-cards{ grid-template-columns:repeat(2,1fr); } }
-
-/* 迷你日历 */
-.fin-cal{ background:var(--bg); border-radius:var(--radius-card); padding:14px 12px; }
-.cal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-.cal-head .cal-title{ font-size:14px; font-weight:550; }
-.cal-nav{ border:none; background:transparent; cursor:pointer; font-size:15px; color:var(--muted); padding:2px 8px; border-radius:8px; }
-.cal-nav:hover{ background:var(--hover); color:var(--text); }
-.cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
-.cal-dow{ text-align:center; font-size:11px; color:var(--muted); padding:4px 0; }
-.cal-cell{ position:relative; text-align:center; font-size:12px; padding:7px 0; border-radius:8px; cursor:pointer; color:var(--text); transition:background .15s; }
-.cal-cell:hover{ background:var(--hover); }
-.cal-cell.other{ color:#CFC9C2; }
-.cal-cell.today{ background:var(--hover); font-weight:600; }
-.cal-cell.sel{ background:var(--primary); color:#fff; }
-.cal-dot{ position:absolute; bottom:3px; left:50%; transform:translateX(-50%); width:5px; height:5px; border-radius:50%; background:var(--primary); }
-.cal-cell.sel .cal-dot{ background:#fff; }
+.fin-flow-layout{ display:block; max-width:900px; }
 
 /* 悬浮记账按钮 */
 .fab{ position:fixed; right:32px; bottom:84px; width:58px; height:58px; border-radius:50%; background:var(--primary); color:#fff; border:none; font-size:20px; font-weight:600; cursor:pointer; box-shadow:0 8px 22px rgba(194,162,146,0.45); transition:transform .15s, background .2s; z-index:18; }
