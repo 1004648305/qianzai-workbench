@@ -242,6 +242,8 @@ body{
 .reminder-banner .rem-hint{ font-size:11px; color:#A88A5C; }
 @media (min-width:681px){
   .reminder-banner .rem-list{ max-width:680px; }
+  /* 桌面端：日历固定，手机端随页上移 */
+  .fin-cal{ position:sticky; top:84px; z-index:5; }
 }
 
 /* ---------- 分段切换按钮（图标在上、文字在下） ---------- */
@@ -371,7 +373,7 @@ body{
 @media (max-width:900px){ .fin-flow-layout{ grid-template-columns:1fr; } .fin-cards{ grid-template-columns:repeat(2,1fr); } }
 
 /* 迷你日历 */
-.fin-cal{ position:sticky; top:0; z-index:5; background:var(--bg); border-radius:var(--radius-card); padding:14px 12px; }
+.fin-cal{ background:var(--bg); border-radius:var(--radius-card); padding:14px 12px; }
 .cal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
 .cal-head .cal-title{ font-size:14px; font-weight:550; }
 .cal-nav{ border:none; background:transparent; cursor:pointer; font-size:15px; color:var(--muted); padding:2px 8px; border-radius:8px; }
