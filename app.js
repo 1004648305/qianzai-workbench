@@ -22,7 +22,7 @@
     exerciseGoal: { monthDays: 15, remindTime: '' },
     exerciseCustomTypes: [],
     exerciseBadgesSeen: [],
-    finHide: { asset: false, income: false }
+    finHide: { asset: false, income: false, expense: false, balance: false }
   };
 
   function loadState() {
@@ -2300,8 +2300,8 @@
     var cells = [
       { k: '总资产', v: money(asset), c: 'asset', eye: true, key: 'asset' },
       { k: '本月收入', v: money(inc), c: 'income', eye: true, key: 'income' },
-      { k: '本月支出', v: money(out), c: 'expense' },
-      { k: '本月结余', v: money(inc - out), c: '' }
+      { k: '本月支出', v: money(out), c: 'expense', eye: true, key: 'expense' },
+      { k: '本月结余', v: money(inc - out), c: '', eye: true, key: 'balance' }
     ];
     $('finCards').innerHTML = cells.map(function (c) {
       var valHtml = '<div class="v ' + c.c + '">' + (c.eye && hide[c.key] ? '****' : c.v) + '</div>';
