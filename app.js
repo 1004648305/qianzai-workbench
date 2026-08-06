@@ -21,7 +21,8 @@
     readingGoal: 24,
     exerciseGoal: { monthDays: 15, remindTime: '' },
     exerciseCustomTypes: [],
-    exerciseBadgesSeen: []
+    exerciseBadgesSeen: [],
+    finHide: { asset: false, income: false }
   };
 
   function loadState() {
@@ -2295,15 +2296,28 @@
       var bal = acctBalance(a);
       if (a.type === '信用卡') { if (bal < 0) liability += -bal; } else asset += bal;
     });
+    var hide = state.finHide || {};
     var cells = [
-      { k: '总资产', v: money(asset), c: 'asset' },
-      { k: '本月收入', v: money(inc), c: 'income' },
+      { k: '总资产', v: money(asset), c: 'asset', eye: true, key: 'asset' },
+      { k: '本月收入', v: money(inc), c: 'income', eye: true, key: 'income' },
       { k: '本月支出', v: money(out), c: 'expense' },
       { k: '本月结余', v: money(inc - out), c: '' }
     ];
     $('finCards').innerHTML = cells.map(function (c) {
-      return '<div class="fin-card"><div class="k">' + c.k + '</div><div class="v ' + c.c + '">' + c.v + '</div></div>';
+      var valHtml = '<div class="v ' + c.c + '">' + (c.eye && hide[c.key] ? '****' : c.v) + '</div>';
+      var eyeBtn = c.eye ? ('<span class="eye-toggle" data-key="' + c.key + '" title="' + (hide[c.key] ? '显示金额' : '隐藏金额') + '">' + (hide[c.key] ? '🙈' : '👁️') + '</span>') : '';
+      return '<div class="fin-card"><div class="k">' + c.k + eyeBtn + '</div>' + valHtml + '</div>';
     }).join('');
+    // 绑定眼睛点击
+    Array.prototype.forEach.call($('finCards').querySelectorAll('.eye-toggle'), function (el) {
+      el.onclick = function () {
+        var key = el.getAttribute('data-key');
+        if (!state.finHide) state.finHide = {};
+        state.finHide[key] = !state.finHide[key];
+        saveState();
+        renderFinCards();
+      };
+    });
   }
 
   /* ---- Tab 1：流水 ---- */
