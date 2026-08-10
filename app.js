@@ -12,7 +12,7 @@
   var EMPTY = {
     reading: [], notes: [], exercise: [], meal: [], weight: [], finance: [],
     plan: [], todo: [], life: [], travel: [],
-    choreMembers: [ { id: 'a', name: '倩崽', color: '#D4B8A8' }, { id: 'b', name: '胖崽', color: '#7FB1C9' } ],
+    choreMembers: [ { id: 'a', name: '倩崽', color: '#4FA67E' }, { id: 'b', name: '胖崽', color: '#7FB1C9' } ],
     choreDone: {},
     lifeLists: [], lifeItems: [], lifeGroups: [], lifeTemplates: [],
     accounts: [], budgets: [], finCats: [],
@@ -289,7 +289,7 @@
     '人情收礼': ['所收红包', '满月收礼', '白事收礼', '婚嫁收礼', '乔迁收礼', '升学收礼', '寿辰收礼'],
     '其他收入': ['奖金收入', '中奖收入', '经营所得', '意外来钱']
   };
-  var FIN_COLORS = ['#D4B8A8', '#B7C4B1', '#A7B8C9', '#E0C8A0', '#C9A9B0', '#9FB8B0', '#D8BFA8', '#B0A9C4', '#C2B89C', '#A9C0C4', '#CDB6C9'];
+  var FIN_COLORS = ['#4FA67E', '#B7C4B1', '#A7B8C9', '#E0C8A0', '#C9A9B0', '#9FB8B0', '#D8BFA8', '#B0A9C4', '#C2B89C', '#A9C0C4', '#CDB6C9'];
 
   // 二级分类图标映射（emoji）
   var CAT_ICONS = {
@@ -524,11 +524,11 @@
   }
   function statusTag(status) {
     var map = {
-      '正在读': { t: '在读中', bg: '#F0E6E0', c: '#D4B8A8' },
-      '读完': { t: '已读完', bg: '#E8F0EC', c: '#8CB3A0' },
-      '想读': { t: '想读', bg: '#EDEAE8', c: '#B0A8A0' }
+      '正在读': { t: '在读中', bg: '#EAF4EE', c: '#3C8C68' },
+      '读完': { t: '已读完', bg: '#E6F4EC', c: '#2FAE72' },
+      '想读': { t: '想读', bg: '#EEF3F0', c: '#7E8F86' }
     };
-    var m = map[status] || { t: status, bg: '#EDEAE8', c: '#B0A8A0' };
+    var m = map[status] || { t: status, bg: '#EEF3F0', c: '#7E8F86' };
     return '<span class="tag rd-status-tag" style="background:' + m.bg + ';color:' + m.c + '">' + esc(m.t) + '</span>';
   }
   function finishedThisYear() {
@@ -889,7 +889,7 @@
     '跳绳': 15, '划船机': 30, '椭圆机': 30
   };
   var EX_CAL_PER_MIN = { '跑步': 10, '球类': 9, '健身': 8, '骑行': 8, '游泳': 11, '户外': 7, '其他': 6 };
-  var EX_CHART_COLORS = ['#D4B8A8', '#9CAF88', '#8AA0B5', '#E8B98A', '#C9A0C9', '#B5C9A0', '#E0A0A0'];
+  var EX_CHART_COLORS = ['#4FA67E', '#9CAF88', '#8AA0B5', '#E8B98A', '#C9A0C9', '#B5C9A0', '#E0A0A0'];
   var EX_BADGES = [
     { key: 'first', icon: '🏅', name: '首次运动', desc: '完成第一条运动记录' },
     { key: 'streak7', icon: '📅', name: '连续7天', desc: '连续打卡7天' },
@@ -1057,7 +1057,7 @@
     var bw = (W - padX * 2) / n, chartH = H - padB - padT, bars = '';
     buckets.forEach(function (b, i) {
       var h = Math.round(b.value / max * chartH), x = padX + i * bw + bw * 0.18, w = bw * 0.64, y = padT + (chartH - h);
-      bars += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="3" fill="#D4B8A8"/>';
+      bars += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="3" fill="#4FA67E"/>';
       if (b.value) bars += '<text x="' + (x + w / 2) + '" y="' + (y - 3) + '" font-size="9" text-anchor="middle" fill="#7a6a60">' + b.value + '</text>';
       bars += '<text x="' + (x + w / 2) + '" y="' + (H - 8) + '" font-size="8" text-anchor="middle" fill="#a99b90">' + esc(b.label) + '</text>';
     });
@@ -1071,7 +1071,7 @@
       arcs += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + s.color + '" stroke-width="' + sw + '" stroke-dasharray="' + len + ' ' + (circ - len) + '" stroke-dashoffset="' + off + '" transform="rotate(-90 ' + cx + ' ' + cy + ')"/>';
       acc += s.value / total;
     });
-    return '<svg viewBox="0 0 ' + W + ' ' + H + '" class="ex-donut" preserveAspectRatio="xMidYMid meet"><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#F0EDEA" stroke-width="' + sw + '"/><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#F0EDEA" stroke-width="' + sw + '"/>' + arcs + '<text x="' + cx + '" y="' + (cy - 2) + '" font-size="18" text-anchor="middle" fill="#5b4f47" font-weight="600">' + total + '</text><text x="' + cx + '" y="' + (cy + 16) + '" font-size="10" text-anchor="middle" fill="#a99b90">总次数</text></svg>';
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" class="ex-donut" preserveAspectRatio="xMidYMid meet"><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#EAF4EE" stroke-width="' + sw + '"/><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#EAF4EE" stroke-width="' + sw + '"/>' + arcs + '<text x="' + cx + '" y="' + (cy - 2) + '" font-size="18" text-anchor="middle" fill="#5b4f47" font-weight="600">' + total + '</text><text x="' + cx + '" y="' + (cy + 16) + '" font-size="10" text-anchor="middle" fill="#a99b90">总次数</text></svg>';
   }
   function renderExerciseStats() {
     var box = $('exStats');
@@ -1436,7 +1436,7 @@
     // 营养素占比环形图
     var macro = [sum.protein, sum.carb, sum.fat];
     var total = macro[0] + macro[1] + macro[2];
-    var colors = ['#94B0A0', '#D4B8A8', '#E0B389'];
+    var colors = ['#94B0A0', '#4FA67E', '#E0B389'];
     var labels = ['蛋白质', '碳水', '脂肪'];
     $('nutriDonut').innerHTML = total > 0
       ? donutHTML(total ? macro : [1, 1, 1], colors, labels, Math.round(total) + ' g')
@@ -1461,11 +1461,11 @@
     function Y(v) { return mT + ph * (1 - v / maxV); }
     var path = data.map(function (d, i) { return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(d.v).toFixed(1); }).join(' ');
     var area = path + ' L' + X(data.length - 1).toFixed(1) + ' ' + (mT + ph) + ' L' + X(0).toFixed(1) + ' ' + (mT + ph) + ' Z';
-    var dots = data.map(function (d, i) { return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(d.v).toFixed(1) + '" r="3" fill="#D4B8A8"><title>' + d.label + ' · ' + Math.round(d.v) + ' kcal</title></circle>'; }).join('');
+    var dots = data.map(function (d, i) { return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(d.v).toFixed(1) + '" r="3" fill="#4FA67E"><title>' + d.label + ' · ' + Math.round(d.v) + ' kcal</title></circle>'; }).join('');
     var xl = data.map(function (d, i) { return '<text x="' + X(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" class="w-chart-tip">' + d.label + '</text>'; }).join('');
     box.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img">' +
-      '<defs><linearGradient id="mealTrend" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D4B8A8" stop-opacity="0.18"/><stop offset="100%" stop-color="#D4B8A8" stop-opacity="0.02"/></linearGradient></defs>' +
-      '<path d="' + area + '" fill="url(#mealTrend)"/><path d="' + path + '" fill="none" stroke="#D4B8A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<defs><linearGradient id="mealTrend" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FA67E" stop-opacity="0.18"/><stop offset="100%" stop-color="#4FA67E" stop-opacity="0.02"/></linearGradient></defs>' +
+      '<path d="' + area + '" fill="url(#mealTrend)"/><path d="' + path + '" fill="none" stroke="#4FA67E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
       dots + xl + '</svg>';
   }
   function renderNutriByMeal() {
@@ -1479,7 +1479,7 @@
       var v = sums[t], pct = Math.round(v / total * 100);
       return '<div style="display:flex;align-items:center;gap:10px;margin:8px 0">' +
         '<span style="width:42px;font-size:12px;color:var(--muted)">' + t + '</span>' +
-        '<div style="flex:1;height:6px;border-radius:3px;background:#F0EDEA;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:#D4B8A8;border-radius:3px"></div></div>' +
+        '<div style="flex:1;height:6px;border-radius:3px;background:#EAF4EE;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:#4FA67E;border-radius:3px"></div></div>' +
         '<span style="width:86px;font-size:12px;color:var(--text);text-align:right">' + Math.round(v) + ' kcal · ' + pct + '%</span></div>';
     }).join('');
   }
@@ -2054,7 +2054,7 @@
       var m3 = diffNeed > 0 ? { lbl: '还需减', val: diffNeed.toFixed(1) + ' kg' } : { lbl: '已减', val: diffLost.toFixed(1) + ' kg' };
       if (target > 0 && startW > 0) {
         var pct = startW > target ? Math.max(0, Math.min(100, (diffLost / (startW - target)) * 100)) : 0;
-        var col = pct < 50 ? '#E0A82E' : pct < 80 ? '#D4B8A8' : pct < 100 ? '#2D7D46' : '#D4AF37';
+        var col = pct < 50 ? '#E0A82E' : pct < 80 ? '#4FA67E' : pct < 100 ? '#2D7D46' : '#D4AF37';
         progHtml = '<div class="w-progress"><div class="txt">已减 ' + diffLost.toFixed(1) + 'kg / 目标 ' + (startW - target).toFixed(1) + 'kg · 完成 ' + pct.toFixed(0) + '%</div><div class="bar"><div class="fill" style="width:' + pct + '%;background:' + col + '"></div></div></div>';
       }
       assetInfo = '<div class="w-metrics">' + [m1, m2, m3, { lbl: '连续记录', val: streakDays() + ' 天' }].map(function (m) {
@@ -2136,15 +2136,15 @@
     var ylines = '';
     for (var g = 0; g <= 4; g++) { var gv = lo + (hi - lo) * g / 4; ylines += '<line x1="' + mL + '" y1="' + (mT + ph * g / 4).toFixed(1) + '" x2="' + (W - mR) + '" y2="' + (mT + ph * g / 4).toFixed(1) + '" stroke="#ECE8E4" stroke-width="1"/>'; ylines += '<text x="' + (mL - 6) + '" y="' + (mT + ph * g / 4 + 3).toFixed(1) + '" text-anchor="end" class="w-chart-tip">' + gv.toFixed(1) + '</text>'; }
     var xlabels = data.map(function (d, i) { return '<text x="' + X(i).toFixed(1) + '" y="' + (H - 12) + '" text-anchor="middle" class="w-chart-tip">' + d.label + '</text>'; }).join('');
-    var dots = data.map(function (d, i) { return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(d.v).toFixed(1) + '" r="3.5" fill="#D4B8A8" data-d="' + d.x + '"><title>' + d.x + ' · ' + d.v.toFixed(1) + ' kg</title></circle>'; }).join('');
+    var dots = data.map(function (d, i) { return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(d.v).toFixed(1) + '" r="3.5" fill="#4FA67E" data-d="' + d.x + '"><title>' + d.x + ' · ' + d.v.toFixed(1) + ' kg</title></circle>'; }).join('');
     var tLine = '', sLine = '';
     if (target > 0 && target >= lo && target <= hi) tLine = '<line x1="' + mL + '" y1="' + Y(target).toFixed(1) + '" x2="' + (W - mR) + '" y2="' + Y(target).toFixed(1) + '" stroke="#8A8A8A" stroke-width="1.2" stroke-dasharray="6 4"/><text x="' + (W - mR) + '" y="' + (Y(target) - 4).toFixed(1) + '" text-anchor="end" class="w-chart-tip">目标 ' + target.toFixed(1) + '</text>';
     if (startW > 0 && startW >= lo && startW <= hi) sLine = '<line x1="' + mL + '" y1="' + Y(startW).toFixed(1) + '" x2="' + (W - mR) + '" y2="' + Y(startW).toFixed(1) + '" stroke="#CFC9C3" stroke-width="1.2" stroke-dasharray="4 4"/><text x="' + mL + '" y="' + (Y(startW) - 4).toFixed(1) + '" class="w-chart-tip">起始 ' + startW.toFixed(1) + '</text>';
     box.innerHTML =
       '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img">' +
-      '<defs><linearGradient id="wgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D4B8A8" stop-opacity="0.18"/><stop offset="100%" stop-color="#D4B8A8" stop-opacity="0.02"/></linearGradient></defs>' +
+      '<defs><linearGradient id="wgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4FA67E" stop-opacity="0.18"/><stop offset="100%" stop-color="#4FA67E" stop-opacity="0.02"/></linearGradient></defs>' +
       ylines + area + '<path d="' + area + '" fill="url(#wgrad)" stroke="none"/>' +
-      '<path d="' + path + '" fill="none" stroke="#D4B8A8" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' +
+      '<path d="' + path + '" fill="none" stroke="#4FA67E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' +
       tLine + sLine + dots + xlabels + '</svg>';
     Array.prototype.forEach.call(box.querySelectorAll('circle'), function (c) {
       c.addEventListener('click', function () { wSelDate = c.getAttribute('data-d'); renderWeightList(); weightTab = 'list'; renderWeight(); });
@@ -2501,7 +2501,7 @@
     var legend = '<div class="rep-legend">' + items.map(function (it) {
       return '<span class="lg"><span class="dot" style="background:' + it.color + '"></span>' + esc(it.name) + ' ' + Math.round(it.value / total * 100) + '%</span>';
     }).join('') + '</div>';
-    var svg = '<svg viewBox="0 0 200 200" role="img"><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#F1EFEC" stroke-width="' + sw + '"/><g>' + arcs + '</g>' +
+    var svg = '<svg viewBox="0 0 200 200" role="img"><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#EAF4EE" stroke-width="' + sw + '"/><g>' + arcs + '</g>' +
       '<text x="' + cx + '" y="' + (cy - 4) + '" font-size="13" fill="#8A8A8A" text-anchor="middle">合计</text>' +
       '<text x="' + cx + '" y="' + (cy + 14) + '" font-size="14" font-weight="600" fill="#3D3D3D" text-anchor="middle">' + money(total) + '</text></svg>';
     return '<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div style="flex:0 0 160px;max-width:160px">' + svg + '</div><div style="flex:1;min-width:160px">' + legend + '</div></div>';
@@ -2970,7 +2970,7 @@
 
   /* ============ 模块8：生活清单（清单 / 事项 / 视图 / 模板 / 统计） ============ */
   var LIFE_ICONS = ['📌', '🛒', '🎬', '🎯', '🧾', '📚', '🏠', '💡', '🍎', '✈️', '💊', '🐱', '🎁', '📝', '🏃', '🎵', '👗', '🔧', '💄', '🌿'];
-  var LIFE_COLORS = ['#D4B8A8', '#B7C4B1', '#A7B8C9', '#E0C8A0', '#C9A9B0', '#9FB8B0', '#D8BFA8', '#B0A9C4', '#C2B89C', '#A9C0C4', '#CDB6C9', '#E6B8A0', '#9FB0C4', '#C4B9A0'];
+  var LIFE_COLORS = ['#4FA67E', '#B7C4B1', '#A7B8C9', '#E0C8A0', '#C9A9B0', '#9FB8B0', '#D8BFA8', '#B0A9C4', '#C2B89C', '#A9C0C4', '#CDB6C9', '#E6B8A0', '#9FB0C4', '#C4B9A0'];
   var lifeView = 'all';       // all | today | important | done
   var lifeSelList = null;     // 当前打开的清单 id
 
@@ -3031,7 +3031,7 @@
       groups[g].forEach(function (l) {
         var pr = lifeProgress(l.id);
         var full = pr.total > 0 && pr.done === pr.total;
-        var color = l.color || '#D4B8A8';
+        var color = l.color || '#4FA67E';
         html += '<div class="life-list-card" data-act="life-open" data-id="' + l.id + '" style="--lc:' + esc(color) + '">' +
           '<div class="life-list-bar"></div>' +
           '<div class="life-list-body">' +
@@ -3101,7 +3101,7 @@
     var items = lifeItemsOf(list.id);
     var pr = lifeProgress(list.id);
     var full = pr.total > 0 && pr.done === pr.total;
-    var color = list.color || '#D4B8A8';
+    var color = list.color || '#4FA67E';
     var html = '';
     html += '<div class="card life-detail-head" style="--lc:' + esc(color) + '">' +
       '<div class="life-detail-top">' +
@@ -3238,7 +3238,7 @@
     var editingList = id ? (state.lifeLists || []).find(function (l) { return l.id === id; }) : null;
     var name = editingList ? editingList.name : '';
     var icon = editingList ? (editingList.icon || '📌') : '📌';
-    var color = editingList ? (editingList.color || '#D4B8A8') : LIFE_COLORS[(state.lifeLists || []).length % LIFE_COLORS.length];
+    var color = editingList ? (editingList.color || '#4FA67E') : LIFE_COLORS[(state.lifeLists || []).length % LIFE_COLORS.length];
     var group = editingList ? (editingList.group || '') : '';
     var groups = state.lifeGroups || [];
     $('modalTitle').textContent = editingList ? '编辑清单' : '新建清单';
@@ -3345,14 +3345,14 @@
     var items = lifeItemsOf(listId).map(function (i) {
       return { content: i.content, dueDate: i.dueDate || '', priority: i.priority || 'normal', note: i.note || '', subtasks: (i.subtasks || []).map(function (s) { return { content: s.content, done: false }; }) };
     });
-    state.lifeTemplates = (state.lifeTemplates || []).concat([{ id: uid(), name: l.name, icon: l.icon || '📋', color: l.color || '#D4B8A8', items: items }]);
+    state.lifeTemplates = (state.lifeTemplates || []).concat([{ id: uid(), name: l.name, icon: l.icon || '📋', color: l.color || '#4FA67E', items: items }]);
     saveState(); toast('📋 已保存为模板', 'ok'); renderLife();
   }
   function useLifeTemplate(id) {
     var t = (state.lifeTemplates || []).find(function (x) { return x.id === id; });
     if (!t) return;
     var maxOrder = (state.lifeLists || []).reduce(function (m, l) { return Math.max(m, l.order || 0); }, 0);
-    var newList = { id: uid(), name: t.name + ' 副本', icon: t.icon || '📋', group: '', color: t.color || '#D4B8A8', order: maxOrder + 1 };
+    var newList = { id: uid(), name: t.name + ' 副本', icon: t.icon || '📋', group: '', color: t.color || '#4FA67E', order: maxOrder + 1 };
     state.lifeLists = (state.lifeLists || []).concat([newList]);
     var k = 0;
     (t.items || []).forEach(function (it) {
@@ -3911,7 +3911,7 @@
   }
 
   function openChoreMemberModal() {
-    var a = state.choreMembers[0] || { name: '倩崽', color: '#D4B8A8' };
+    var a = state.choreMembers[0] || { name: '倩崽', color: '#4FA67E' };
     var b = state.choreMembers[1] || { name: '胖崽', color: '#7FB1C9' };
     $('modalTitle').textContent = '设置家务成员';
     $('modalBody').innerHTML =
@@ -3932,7 +3932,7 @@
 
   function choreInit() {
     if (!state.choreMembers || !state.choreMembers.length) {
-      state.choreMembers = [ { id: 'a', name: '倩崽', color: '#D4B8A8' }, { id: 'b', name: '胖崽', color: '#7FB1C9' } ];
+      state.choreMembers = [ { id: 'a', name: '倩崽', color: '#4FA67E' }, { id: 'b', name: '胖崽', color: '#7FB1C9' } ];
     }
     if (!state.choreDone || typeof state.choreDone !== 'object' || Array.isArray(state.choreDone)) state.choreDone = {};
     saveState();
