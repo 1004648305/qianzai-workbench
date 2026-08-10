@@ -1008,94 +1008,126 @@ body{
   .ch-week-head, .ch-week-cols{ grid-template-columns:repeat(7,minmax(58px,1fr)); }
 }
 
-/* ===== 桌面端（≥900px）：宽侧边栏 + 多列内容，明显区别于手机 ===== */
-@media (min-width:900px){
-  /* 宽侧边栏：完整文字导航 */
+/* ===== 桌面端（≥768px）：宽侧边栏 + 多列内容，彻底区别于手机 ===== */
+@media (min-width:768px){
+  /* ===== 宽侧边栏：完整文字导航 ===== */
   .sidebar{
-    width:236px; flex:0 0 236px;
-    padding:24px 16px;
-    align-items:stretch; gap:8px;
+    width:220px; flex:0 0 220px;
+    padding:24px 14px;
+    align-items:stretch; gap:6px;
     box-shadow:2px 0 18px rgba(60,140,104,0.05);
   }
-  .sidebar:hover, .sidebar:focus, .sidebar:active{ width:236px; flex-basis:236px; }
+  .sidebar:hover, .sidebar:focus, .sidebar:active{ width:220px; flex-basis:220px; }
   .sidebar-logo{
-    width:auto; height:auto; font-size:26px;
-    margin-bottom:2px; padding:0 8px;
+    width:auto; height:auto; font-size:24px;
+    margin-bottom:2px; padding:0 6px;
   }
   .sidebar-title{
-    display:block; font-size:16px; font-weight:700; color:var(--primary-deep);
-    padding:0 10px 18px; letter-spacing:.5px;
+    display:block; font-size:15px; font-weight:700; color:var(--primary-deep);
+    padding:0 8px 16px; letter-spacing:.5px;
   }
-  .nav{ gap:5px; }
+  .nav{ gap:4px; }
   .nav-item{
     flex-direction:row; justify-content:flex-start; align-items:center;
-    gap:12px; padding:11px 14px; font-size:14px;
-    border-radius:12px; text-align:left; white-space:nowrap;
+    gap:10px; padding:10px 12px; font-size:13.5px;
+    border-radius:11px; text-align:left; white-space:nowrap;
   }
-  .nav-item .nav-ico{ font-size:20px; }
-  .nav-item .nav-label{ font-size:14px; line-height:1; opacity:1; }
+  .nav-item .nav-ico{ font-size:18px; }
+  .nav-item .nav-label{ font-size:13.5px; line-height:1; opacity:1; }
   .nav-item.active{
     background:linear-gradient(135deg,var(--surface),#DCEFE6);
     color:var(--primary-deep); font-weight:600;
     box-shadow:inset 3px 0 0 var(--primary);
   }
 
-  /* ---- 内容区：铺满右侧大屏，仅限较宽上限防超宽屏过宽 ---- */
+  /* ===== 内容区：铺满右侧，不居中限宽 ===== */
   .content{ height:100vh; }
-  .topbar, .panels{ max-width:1600px; margin-left:auto; margin-right:auto; }
-  .panels{ padding:36px 48px 96px; }
+  .topbar, .panels{ max-width:none; width:auto; }
+  .panels{ padding:28px 36px 90px; }
 
-  /* ---- 今日总览：统计卡片三列网格 ---- */
+  /* ===== 今日总览：统计卡片三列 ===== */
   .ov-grid{
     display:grid !important;
     grid-template-columns:repeat(3,1fr) !important;
-    gap:16px !important;
+    gap:14px !important;
   }
 
-  /* ---- 理财卡片四列 ---- */
+  /* ===== 理财卡片四列 ===== */
   .fin-cards{
     display:grid !important;
     grid-template-columns:repeat(4,1fr) !important;
-    gap:16px !important;
+    gap:14px !important;
   }
-  .fin-card .v{ font-size:18px; }
 
-  /* ---- 列表两列网格 ---- */
+  /* ===== 所有列表两列 ===== */
   .list{
     display:grid !important;
     grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-    gap:14px !important;
+    gap:12px !important;
   }
   .list > *{ margin-bottom:0 !important; }
 
-  /* ---- 表单三列 ---- */
-  .form-grid{ grid-template-columns:repeat(3,1fr) !important; }
+  /* ===== 表单两列（768px下两列更安全） ===== */
+  .form-grid{ grid-template-columns:repeat(2,1fr) !important; }
 
-  /* ---- 理财账户网格 ---- */
+  /* ===== 阅读模块桌面布局 ===== */
+  /* 摘要区：状态左 + 目标右，横向排列 */
+  .rd-top{
+    display:grid !important;
+    grid-template-columns:280px 1fr !important;
+    gap:20px !important;
+    align-items:start;
+  }
+  /* 书架多列 */
+  .rd-grid{ grid-template-columns:repeat(auto-fill,minmax(220px,1fr)) !important; }
+  /* 今年已读书目多列 */
+  .rd-yb-grid{ grid-template-columns:repeat(auto-fill,minmax(80px,1fr)) !important; }
+
+  /* ===== 理财账户网格 ===== */
+  .fin-acct-grid{ grid-template-columns:repeat(auto-fill,minmax(240px,1fr)) !important; }
+
+  /* ===== 底部操作栏跟随宽侧边栏 ===== */
+  .footer{ left:220px; padding:12px 32px; }
+  .sidebar:hover ~ .content .footer{ left:220px; }
+
+  /* ===== 悬浮按钮 ===== */
+  .fab{ right:28px; bottom:28px; width:54px; height:54px; font-size:20px; }
+
+  /* ===== 卡片字号略大 ===== */
+  .card{ padding:18px 22px; }
+  .page-title{ font-size:22px; }
+  .overview-greet{ font-size:20px; }
+}
+
+/* ===== 大桌面（≥1200px）：更多列、更宽松 ===== */
+@media (min-width:1200px){
+  .sidebar{ width:240px; flex:0 0 240px; padding:28px 18px; }
+  .sidebar:hover, .sidebar:focus, .sidebar:active{ width:240px; flex-basis:240px; }
+  .sidebar-title{ font-size:16px; padding:0 10px 20px; }
+  .nav-item{ padding:11px 14px; font-size:14px; gap:12px; }
+  .nav-item .nav-label{ font-size:14px; }
+  .nav-item .nav-ico{ font-size:20px; }
+  .panels{ padding:34px 48px 96px; }
+  .footer{ left:240px; padding:14px 40px; }
+  .sidebar:hover ~ .content .footer{ left:240px; }
+
+  .ov-grid{ grid-template-columns:repeat(3,1fr) !important; gap:18px !important; }
+  .fin-cards{ grid-template-columns:repeat(4,1fr) !important; gap:18px !important; }
+  .list{ grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:16px !important; }
+  .form-grid{ grid-template-columns:repeat(3,1fr) !important; }
+  .rd-top{ grid-template-columns:300px 1fr !important; gap:24px !important; }
+  .rd-grid{ grid-template-columns:repeat(auto-fill,minmax(240px,1fr)) !important; }
+  .rd-yb-grid{ grid-template-columns:repeat(auto-fill,minmax(90px,1fr)) !important; }
   .fin-acct-grid{ grid-template-columns:repeat(auto-fill,minmax(280px,1fr)) !important; }
 
-  /* ---- 阅读书架多列 ---- */
-  .rd-grid{ grid-template-columns:repeat(auto-fill,minmax(260px,1fr)) !important; }
-
-  /* ---- 底部操作栏跟随宽侧边栏 ---- */
-  .footer{ left:236px; padding:14px 36px; }
-  .sidebar:hover ~ .content .footer{ left:236px; }
-
-  /* ---- 悬浮按钮稍大、留边 ---- */
-  .fab{ right:32px; bottom:32px; width:56px; height:56px; font-size:22px; }
-
-  /* ---- 卡片字号略大、更舒适 ---- */
   .card{ padding:20px 24px; }
   .page-title{ font-size:24px; }
   .overview-greet{ font-size:22px; }
 }
 
-/* ===== 大桌面（≥1280px）：更多列、更宽松，充分利用宽屏 ===== */
-@media (min-width:1280px){
+/* ===== 超大屏（≥1600px）：列表升三列 ===== */
+@media (min-width:1600px){
   .panels{ padding:40px 64px 100px; }
   .ov-grid{ grid-template-columns:repeat(4,1fr) !important; gap:20px !important; }
-  .fin-cards{ grid-template-columns:repeat(4,1fr) !important; gap:20px !important; }
   .list{ grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:18px !important; }
-  .fin-acct-grid{ grid-template-columns:repeat(auto-fill,minmax(300px,1fr)) !important; }
-  .rd-grid{ grid-template-columns:repeat(auto-fill,minmax(280px,1fr)) !important; }
 }
