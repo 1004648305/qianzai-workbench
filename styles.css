@@ -60,6 +60,7 @@ body{
   margin-bottom:6px; flex:0 0 auto;
   width:34px; height:34px; display:flex; align-items:center; justify-content:center;
 }
+.sidebar-title{ display:none; }
 .nav{ display:flex; flex-direction:column; gap:2px; width:100%; }
 .nav-item{
   display:flex; flex-direction:column; /* 默认竖排：图标上、文字下 */
@@ -632,6 +633,7 @@ body{
 /* 响应式 */
 @media (max-width:680px){
   .form-grid{ grid-template-columns:1fr; }
+  .fin-cards{ grid-template-columns:repeat(2,1fr); }
   .footer{ justify-content:center; }
   .topbar{ padding:14px 16px; }
   .panels{ padding:16px 16px 90px; }
@@ -1006,7 +1008,60 @@ body{
   .ch-week-head, .ch-week-cols{ grid-template-columns:repeat(7,minmax(58px,1fr)); }
 }
 
-/* ===== 桌面端大屏：内容居中，阅读更舒适 ===== */
-@media (min-width:1100px){
-  .topbar, .panels{ max-width:1120px; margin-left:auto; margin-right:auto; }
+/* ===== 桌面端（≥900px）：宽侧边栏 + 多列内容，明显区别于手机布局 ===== */
+@media (min-width:900px){
+  /* 宽侧边栏：完整文字导航 */
+  .sidebar{
+    width:236px; flex:0 0 236px;
+    padding:24px 16px;
+    align-items:stretch; gap:8px;
+    box-shadow:2px 0 18px rgba(60,140,104,0.05);
+  }
+  .sidebar:hover, .sidebar:focus, .sidebar:active{ width:236px; flex-basis:236px; }
+  .sidebar-logo{
+    width:auto; height:auto; font-size:26px;
+    margin-bottom:2px; padding:0 8px;
+  }
+  .sidebar-title{
+    display:block; font-size:16px; font-weight:700; color:var(--primary-deep);
+    padding:0 10px 18px; letter-spacing:.5px;
+  }
+  .nav{ gap:5px; }
+  .nav-item{
+    flex-direction:row; justify-content:flex-start; align-items:center;
+    gap:12px; padding:11px 14px; font-size:14px;
+    border-radius:12px; text-align:left; white-space:nowrap;
+  }
+  .nav-item .nav-ico{ font-size:20px; }
+  .nav-item .nav-label{ font-size:14px; line-height:1; opacity:1; }
+  .nav-item.active{
+    background:linear-gradient(135deg,var(--surface),#DCEFE6);
+    color:var(--primary-deep); font-weight:600;
+    box-shadow:inset 3px 0 0 var(--primary);
+  }
+
+  /* 内容居中限宽，阅读更舒适 */
+  .topbar, .panels{ max-width:1200px; margin-left:auto; margin-right:auto; }
+
+  /* 底部操作栏跟随宽侧边栏 */
+  .footer{ left:236px; padding:14px 28px; }
+  .sidebar:hover ~ .content .footer{ left:236px; }
+
+  /* 列表两列网格，明显区别于手机单列 */
+  .list{
+    display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px;
+  }
+  .list > *{ margin-bottom:0 !important; }
+
+  /* 表单三列，利用宽屏空间 */
+  .form-grid{ grid-template-columns:repeat(3,1fr); }
+
+  /* 理财账户网格更宽松 */
+  .fin-acct-grid{ grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); }
+
+  /* 阅读书架多列 */
+  .rd-grid{ grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); }
+
+  /* 悬浮按钮在桌面稍大、留边 */
+  .fab{ right:32px; bottom:32px; width:56px; height:56px; font-size:22px; }
 }
