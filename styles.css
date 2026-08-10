@@ -1040,10 +1040,10 @@ body{
     box-shadow:inset 3px 0 0 var(--primary);
   }
 
-  /* ---- 内容区：居中限宽 + 充裕内边距 ---- */
+  /* ---- 内容区：铺满右侧大屏，仅限较宽上限防超宽屏过宽 ---- */
   .content{ height:100vh; }
-  .topbar, .panels{ max-width:1100px; margin-left:auto; margin-right:auto; }
-  .panels{ padding:32px 36px 90px; }
+  .topbar, .panels{ max-width:1600px; margin-left:auto; margin-right:auto; }
+  .panels{ padding:36px 48px 96px; }
 
   /* ---- 今日总览：统计卡片三列网格 ---- */
   .ov-grid{
@@ -1088,4 +1088,14 @@ body{
   .card{ padding:20px 24px; }
   .page-title{ font-size:24px; }
   .overview-greet{ font-size:22px; }
+}
+
+/* ===== 大桌面（≥1280px）：更多列、更宽松，充分利用宽屏 ===== */
+@media (min-width:1280px){
+  .panels{ padding:40px 64px 100px; }
+  .ov-grid{ grid-template-columns:repeat(4,1fr) !important; gap:20px !important; }
+  .fin-cards{ grid-template-columns:repeat(4,1fr) !important; gap:20px !important; }
+  .list{ grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:18px !important; }
+  .fin-acct-grid{ grid-template-columns:repeat(auto-fill,minmax(300px,1fr)) !important; }
+  .rd-grid{ grid-template-columns:repeat(auto-fill,minmax(280px,1fr)) !important; }
 }
