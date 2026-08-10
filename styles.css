@@ -628,6 +628,7 @@ body{
 .btn.sm{ padding:6px 14px; font-size:13px; }
 .rd-pane[hidden], #rdDetail[hidden]{ display:none !important; }
 
+/* 基础统计卡片样式（锻炼身体等模块共用） */
 .rd-summary .rd-stat-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
 .rd-stat{ display:flex; flex-direction:column; align-items:center; gap:2px; padding:12px 8px; border-radius:12px; background:var(--bg); }
 .rd-stat.rd-click{ cursor:pointer; transition:background .2s, transform .15s; }
@@ -639,9 +640,71 @@ body{
 .rd-goal-fill{ height:100%; border-radius:3px; background:var(--primary); transition:width .4s ease; }
 .rd-goal-txt{ font-size:12px; color:var(--muted); margin-top:6px; }
 
-.rd-tabs{ display:flex; gap:8px; margin-bottom:12px; }
-.rd-tabs button{ flex:1; border:1px solid var(--border); background:var(--card); border-radius:10px; padding:9px 0; font-size:14px; color:var(--muted); cursor:pointer; font-family:var(--font); transition:all .2s; }
-.rd-tabs button.active{ background:var(--primary); color:#fff; border-color:var(--primary); }
+/* 每月阅读模块专属配色 */
+.panel[data-panel="reading"]{
+  --primary:#D4B8A8;   /* 主色 */
+  --primary-deep:#C4A882; /* 辅助色1 */
+  --muted:#B0A8A0;     /* 文字辅助 */
+  --border:#E8DDD6;    /* 辅助色2 分割线/输入框边框 */
+  --hover:#F0E6E0;     /* 主色浅 */
+  --bg:#F8F6F3;        /* 页面背景 */
+  --card:#FFFFFF;      /* 卡片背景 */
+  --text:#3D3D3D;      /* 文字主色 */
+}
+
+/* === 顶部摘要：状态区 + 目标区 === */
+.panel[data-panel="reading"] .rd-summary{ padding:0; background:transparent; border:none; box-shadow:none; }
+.rd-top{ display:flex; gap:14px; align-items:stretch; }
+.rd-state{ flex:0 0 36%; background:var(--bg); border-radius:var(--radius-card); padding:18px 16px; display:flex; flex-direction:column; justify-content:center; gap:18px; }
+.rd-state-item{ display:flex; align-items:center; gap:12px; }
+.rd-state-item.rd-click{ cursor:pointer; border-radius:10px; padding:6px 8px; margin:-6px -8px; transition:background .2s; }
+.rd-state-item.rd-click:hover{ background:var(--hover); }
+.rd-state-ico{ font-size:24px; flex:0 0 auto; }
+.rd-state-txt{ display:flex; flex-direction:column; line-height:1.2; }
+.rd-state-lbl{ font-size:12px; color:var(--muted); }
+.rd-state-num{ font-size:26px; font-weight:600; color:var(--text); }
+.rd-state-num small{ font-size:13px; font-weight:400; color:var(--muted); margin-left:2px; }
+
+.rd-goal{ flex:1; background:var(--bg); border-radius:var(--radius-card); padding:18px 16px; }
+.rd-goal-head{ display:inline-flex; align-items:center; gap:6px; font-size:15px; font-weight:550; color:var(--text); cursor:pointer; }
+.rd-goal-sub{ font-size:12px; color:var(--muted); margin-top:6px; }
+.rd-prog-row{ display:flex; align-items:center; gap:10px; margin-top:12px; }
+.rd-prog-bar{ flex:1; height:6px; border-radius:3px; background:var(--border); overflow:hidden; }
+.rd-prog-fill{ height:100%; width:0; border-radius:3px; background:var(--primary); transition:width .6s ease; }
+.rd-prog-pct{ font-size:12px; color:var(--muted); flex:0 0 auto; }
+
+/* 今年已读书目 */
+.rd-yb-wrap{ margin-top:18px; border-top:1px solid var(--border); padding-top:14px; }
+.rd-yb-title{ font-size:13px; font-weight:550; color:var(--text); margin-bottom:10px; }
+.rd-yb-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(74px,1fr)); gap:10px; }
+.rd-yb{ cursor:pointer; text-align:center; transition:transform .2s; }
+.rd-yb:hover{ transform:translateY(-2px); }
+.rd-yb-cover{ width:100%; aspect-ratio:3/4; border-radius:8px; object-fit:cover; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:600; color:var(--primary); background:var(--hover); }
+.rd-yb-cap{ font-size:11px; color:var(--muted); margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rd-yb.ph{ border:1px dashed var(--border); border-radius:8px; aspect-ratio:3/4; display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--muted); opacity:.6; }
+.rd-yb-empty-tip{ grid-column:1/-1; font-size:14px; color:var(--muted); text-align:center; margin-top:4px; }
+
+/* === Tab 切换（书架/笔记）下划线样式 === */
+.rd-tabs{ display:flex; gap:28px; margin-bottom:14px; border-bottom:1px solid var(--border); }
+.rd-tabs button{ position:relative; border:none; background:transparent; padding:10px 2px; font-size:15px; color:var(--muted); cursor:pointer; font-family:var(--font); transition:color .25s; }
+.rd-tabs button.active{ color:var(--text); font-weight:600; }
+.rd-tabs button::after{ content:''; position:absolute; left:0; right:0; bottom:-1px; height:2px; border-radius:2px; background:var(--primary); transform:scaleX(0); transform-origin:left; transition:transform .25s; }
+.rd-tabs button.active::after{ transform:scaleX(1); }
+
+/* 阅读状态标签 */
+.rd-status-tag{ border-radius:12px; padding:2px 12px; font-size:12px; font-weight:500; }
+
+/* 空状态 */
+.rd-shelf-empty, .rd-notes-empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:48px 20px; }
+.rd-empty-ico{ font-size:48px; line-height:1; margin-bottom:14px; }
+.rd-empty-title{ font-size:18px; font-weight:600; color:var(--text); }
+.rd-empty-sub{ font-size:14px; color:var(--muted); margin-top:6px; }
+.rd-add-book-btn{ margin-top:18px; background:var(--primary); color:#fff; border:none; border-radius:10px; padding:10px 22px; font-size:14px; cursor:pointer; font-family:var(--font); box-shadow:0 4px 16px rgba(212,184,168,0.4); transition:transform .2s, box-shadow .2s; }
+.rd-add-book-btn:hover{ transform:translateY(-2px); box-shadow:0 8px 22px rgba(212,184,168,0.55); }
+
+/* 添加书籍悬浮按钮（阅读模块专属阴影） */
+.panel[data-panel="reading"] .fab{ background:var(--primary); box-shadow:0 4px 16px rgba(212,184,168,0.4); }
+.panel[data-panel="reading"] .fab:hover{ background:var(--primary); transform:translateY(-2px); box-shadow:0 8px 22px rgba(212,184,168,0.55); }
 
 .rd-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px; }
 .rd-book{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius-card); padding:14px; box-shadow:var(--shadow-card); display:flex; gap:12px; cursor:pointer; transition:box-shadow .25s, transform .25s; position:relative; }
@@ -652,7 +715,7 @@ body{
 .rd-book-title{ font-size:15px; font-weight:550; line-height:1.3; }
 .rd-book-author{ font-size:12.5px; color:var(--muted); margin-top:3px; }
 .rd-book-meta{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:8px; }
-.rd-prog{ height:5px; border-radius:3px; background:#F0EDEA; margin-top:10px; overflow:hidden; }
+.rd-prog{ height:5px; border-radius:3px; background:var(--border); margin-top:10px; overflow:hidden; }
 .rd-prog-fill{ height:100%; border-radius:3px; background:var(--primary); transition:width .4s ease; }
 .rd-prog-txt{ font-size:11px; color:var(--muted); margin-top:4px; }
 .rd-book-actions{ display:flex; align-items:center; gap:8px; margin-top:12px; }
@@ -689,6 +752,8 @@ body{
 .rd-year-thumb .rd-year-cap{ position:absolute; left:0; right:0; bottom:0; padding:3px 5px; background:linear-gradient(transparent,rgba(0,0,0,.45)); color:#fff; font-size:11px; }
 
 @media (max-width:680px){
+  .rd-top{ flex-direction:column; }
+  .rd-state{ flex:1 1 auto; }
   .rd-grid{ grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); }
   .rd-detail-main{ flex-direction:column; align-items:center; text-align:center; }
   .rd-year-summary{ grid-template-columns:1fr; }
@@ -850,12 +915,12 @@ body{
   .w-summary .w-metric .val{ font-size:19px; }
   .meal-kcal .big{ font-size:20px; }
   .ch-stat .num{ font-size:15px; }
-  .rd-stat-num{ font-size:22px; }
+  .rd-state-num{ font-size:23px; }
 
   /* —— 各模块正文/标题收敛 —— */
   .topbar, .card, .modal-card, .life-item, .ch-row, .rd-book-body, .ex-today, .rd-note-content, .life-quick-add input{ font-size:13px; }
   .life-list-name, .ch-title, .rd-book-title, .ex-today-title, .rd-detail-info h3{ font-size:14px; }
-  .rd-stat-lbl, .ch-stat .lbl, .life-stat .k{ font-size:11px; }
+  .rd-state-lbl, .ch-stat .lbl, .life-stat .k{ font-size:11px; }
 
   /* —— 模态框贴边 —— */
   .modal-overlay{ padding:calc(20px + env(safe-area-inset-top)) 12px 20px; }

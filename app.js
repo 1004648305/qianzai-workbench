@@ -523,8 +523,13 @@
       '<div class="rd-prog-txt">' + cp + ' / ' + tp + ' 页 · ' + pct + '%</div>';
   }
   function statusTag(status) {
-    var cls = status === '读完' ? 'green' : (status === '想读' ? 'muted' : '');
-    return '<span class="tag ' + cls + '">' + esc(status) + '</span>';
+    var map = {
+      '正在读': { t: '在读中', bg: '#F0E6E0', c: '#D4B8A8' },
+      '读完': { t: '已读完', bg: '#E8F0EC', c: '#8CB3A0' },
+      '想读': { t: '想读', bg: '#EDEAE8', c: '#B0A8A0' }
+    };
+    var m = map[status] || { t: status, bg: '#EDEAE8', c: '#B0A8A0' };
+    return '<span class="tag rd-status-tag" style="background:' + m.bg + ';color:' + m.c + '">' + esc(m.t) + '</span>';
   }
   function finishedThisYear() {
     var y = TODAY.slice(0, 4);
@@ -534,17 +539,37 @@
 
   function renderReadingSummary() {
     var reading = state.reading.filter(function (b) { return b.status === '正在读'; }).length;
-    var done = finishedThisYear().length;
+    var doneBooks = finishedThisYear();
+    var done = doneBooks.length;
     var goal = state.readingGoal || 24;
     var pct = goal > 0 ? Math.min(100, Math.round(done / goal * 100)) : 0;
+    var yearHTML;
+    if (doneBooks.length) {
+      yearHTML = doneBooks.map(function (b) {
+        return '<div class="rd-yb" data-act="detail" data-mod="book" data-id="' + b.id + '">' +
+          bookCoverHTML(b, 'rd-yb-cover') +
+          '<div class="rd-yb-cap">' + esc(b.title) + '</div></div>';
+      }).join('');
+    } else {
+      var ph = '';
+      for (var i = 0; i < 6; i++) ph += '<div class="rd-yb ph"><span>📭</span></div>';
+      yearHTML = ph + '<div class="rd-yb-empty-tip">今年还没有读完的书，加油哦 💪</div>';
+    }
     $('rdSummary').innerHTML =
-      '<div class="rd-stat-row">' +
-        '<div class="rd-stat"><span class="rd-stat-ico">📚</span><span class="rd-stat-num">' + reading + '</span><span class="rd-stat-lbl">在读</span></div>' +
-        '<div class="rd-stat rd-click" data-act="year" title="查看年度已读书目"><span class="rd-stat-ico">📖</span><span class="rd-stat-num">' + done + '</span><span class="rd-stat-lbl">今年已读</span></div>' +
-        '<div class="rd-stat rd-click" data-act="goal" title="修改年度目标"><span class="rd-stat-ico">🎯</span><span class="rd-stat-num">' + goal + '</span><span class="rd-stat-lbl">年度目标</span></div>' +
-      '</div>' +
-      '<div class="rd-goal-bar"><div class="rd-goal-fill" style="width:' + pct + '%"></div></div>' +
-      '<div class="rd-goal-txt">年度目标完成 ' + pct + '%（已读 ' + done + ' / ' + goal + ' 本）</div>';
+      '<div class="rd-top">' +
+        '<div class="rd-state">' +
+          '<div class="rd-state-item"><span class="rd-state-ico">📚</span><div class="rd-state-txt"><span class="rd-state-lbl">在读</span><span class="rd-state-num">' + reading + '<small>本</small></span></div></div>' +
+          '<div class="rd-state-item rd-click" data-act="year" title="查看年度已读书目"><span class="rd-state-ico">📖</span><div class="rd-state-txt"><span class="rd-state-lbl">今年已读</span><span class="rd-state-num">' + done + '<small>本</small></span></div></div>' +
+        '</div>' +
+        '<div class="rd-goal">' +
+          '<div class="rd-goal-head rd-click" data-act="goal" title="修改年度目标"><span>🎯 年度目标</span></div>' +
+          '<div class="rd-goal-sub">已读 ' + done + ' / ' + goal + ' 本</div>' +
+          '<div class="rd-prog-row"><div class="rd-prog-bar"><div class="rd-prog-fill" style="width:0"></div></div><span class="rd-prog-pct">' + pct + '%</span></div>' +
+          '<div class="rd-yb-wrap"><div class="rd-yb-title">今年已读书目</div><div class="rd-yb-grid">' + yearHTML + '</div></div>' +
+        '</div>' +
+      '</div>';
+    var fill = $('rdSummary').querySelector('.rd-prog-fill');
+    if (fill) requestAnimationFrame(function () { fill.style.width = pct + '%'; });
   }
   function renderReading() {
     renderReadingSummary();
@@ -561,7 +586,20 @@
     else if (rdView === 'done') books = books.filter(function (b) { return b.status === '读完'; });
     var box = $('rdGrid');
     if (!books.length) {
-      box.innerHTML = emptyState(rdView === 'done' ? '📭' : (rdView === 'wishlist' ? '💭' : '📖'), rdView === 'done' ? '今年还没读完书，继续加油' : (rdView === 'wishlist' ? '还没有想读的书，去添加吧' : '正在读的书还没添加'));
+      if (state.reading.length === 0) {
+        box.innerHTML = '<div class="rd-shelf-empty">' +
+          '<div class="rd-empty-ico">📚</div>' +
+          '<div class="rd-empty-title">书架还是空的</div>' +
+          '<div class="rd-empty-sub">去添加你的第一本书吧 📖</div>' +
+          '<button class="rd-add-book-btn" data-act="add-book" type="button">+ 添加书籍</button>' +
+        '</div>';
+      } else if (rdView === 'done') {
+        box.innerHTML = emptyState('📭', '今年还没读完书，继续加油');
+      } else if (rdView === 'reading') {
+        box.innerHTML = emptyState('📖', '正在读的书还没添加');
+      } else {
+        box.innerHTML = emptyState('💭', '还没有想读的书，去添加吧');
+      }
       return;
     }
     box.innerHTML = books.map(function (b) {
@@ -598,7 +636,14 @@
   function renderNotes() {
     var box = $('rdNotesList');
     var notes = state.notes.slice().sort(function (a, b) { return (b.createdAt || '') < (a.createdAt || '') ? -1 : 1; });
-    if (!notes.length) { box.innerHTML = emptyState('📝', '还没有笔记，读完书顺手记一笔吧'); return; }
+    if (!notes.length) {
+      box.innerHTML = '<div class="rd-notes-empty">' +
+        '<div class="rd-empty-ico">📝</div>' +
+        '<div class="rd-empty-title">还没有笔记</div>' +
+        '<div class="rd-empty-sub">读完书顺手记一笔吧 ✍️</div>' +
+      '</div>';
+      return;
+    }
     var html = '';
     if (notes.length >= 10) {
       var pick = notes[Math.floor(Math.random() * notes.length)];
@@ -3587,6 +3632,7 @@
       if (act === 'add-note-for') { var forId = btn.closest('[data-id]').getAttribute('data-id'); openNoteModal(forId); return; }
       if (act === 'year') { openYearModal(); return; }
       if (act === 'goal') { openGoalModal(); return; }
+      if (act === 'add-book') { openBookModal(); return; }
       if (act === 'ex-quick') { openExerciseModal(null, 'quick'); return; }
       if (act === 'ex-goal') { openExerciseGoalModal(); return; }
       if (act === 'ex-day') { exSelDate = btn.getAttribute('data-day'); renderExerciseCalendar(); return; }
