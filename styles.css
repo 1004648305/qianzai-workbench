@@ -1008,7 +1008,7 @@ body{
   .ch-week-head, .ch-week-cols{ grid-template-columns:repeat(7,minmax(58px,1fr)); }
 }
 
-/* ===== 桌面端（≥900px）：宽侧边栏 + 多列内容，明显区别于手机布局 ===== */
+/* ===== 桌面端（≥900px）：宽侧边栏 + 多列内容，明显区别于手机 ===== */
 @media (min-width:900px){
   /* 宽侧边栏：完整文字导航 */
   .sidebar{
@@ -1040,28 +1040,52 @@ body{
     box-shadow:inset 3px 0 0 var(--primary);
   }
 
-  /* 内容居中限宽，阅读更舒适 */
-  .topbar, .panels{ max-width:1200px; margin-left:auto; margin-right:auto; }
+  /* ---- 内容区：居中限宽 + 充裕内边距 ---- */
+  .content{ height:100vh; }
+  .topbar, .panels{ max-width:1100px; margin-left:auto; margin-right:auto; }
+  .panels{ padding:32px 36px 90px; }
 
-  /* 底部操作栏跟随宽侧边栏 */
-  .footer{ left:236px; padding:14px 28px; }
-  .sidebar:hover ~ .content .footer{ left:236px; }
+  /* ---- 今日总览：统计卡片三列网格 ---- */
+  .ov-grid{
+    display:grid !important;
+    grid-template-columns:repeat(3,1fr) !important;
+    gap:16px !important;
+  }
 
-  /* 列表两列网格，明显区别于手机单列 */
+  /* ---- 理财卡片四列 ---- */
+  .fin-cards{
+    display:grid !important;
+    grid-template-columns:repeat(4,1fr) !important;
+    gap:16px !important;
+  }
+  .fin-card .v{ font-size:18px; }
+
+  /* ---- 列表两列网格 ---- */
   .list{
-    display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px;
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:14px !important;
   }
   .list > *{ margin-bottom:0 !important; }
 
-  /* 表单三列，利用宽屏空间 */
-  .form-grid{ grid-template-columns:repeat(3,1fr); }
+  /* ---- 表单三列 ---- */
+  .form-grid{ grid-template-columns:repeat(3,1fr) !important; }
 
-  /* 理财账户网格更宽松 */
-  .fin-acct-grid{ grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); }
+  /* ---- 理财账户网格 ---- */
+  .fin-acct-grid{ grid-template-columns:repeat(auto-fill,minmax(280px,1fr)) !important; }
 
-  /* 阅读书架多列 */
-  .rd-grid{ grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); }
+  /* ---- 阅读书架多列 ---- */
+  .rd-grid{ grid-template-columns:repeat(auto-fill,minmax(260px,1fr)) !important; }
 
-  /* 悬浮按钮在桌面稍大、留边 */
+  /* ---- 底部操作栏跟随宽侧边栏 ---- */
+  .footer{ left:236px; padding:14px 36px; }
+  .sidebar:hover ~ .content .footer{ left:236px; }
+
+  /* ---- 悬浮按钮稍大、留边 ---- */
   .fab{ right:32px; bottom:32px; width:56px; height:56px; font-size:22px; }
+
+  /* ---- 卡片字号略大、更舒适 ---- */
+  .card{ padding:20px 24px; }
+  .page-title{ font-size:24px; }
+  .overview-greet{ font-size:22px; }
 }
