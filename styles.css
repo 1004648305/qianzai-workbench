@@ -815,29 +815,52 @@ body{
 .rd-note-search::placeholder{ color:var(--muted); }
 
 /* 记笔记——关联书籍搜索下拉 */
-.nt-book-search-wrap{ position:relative; }
-.nt-book-search-wrap input[type=text]{
-  font-family:var(--font); font-size:14px; color:var(--text);
+/* ===== 关联书籍可搜索下拉选择器 ===== */
+.nt-book-picker{ position:relative; }
+.nt-book-trigger{
+  display:flex; align-items:center; justify-content:space-between;
   background:#fff; border:1px solid var(--border); border-radius:var(--radius-input);
-  padding:9px 11px; outline:none; width:100%; transition:border-color .2s, box-shadow .2s; box-sizing:border-box;
+  padding:9px 12px; cursor:pointer; transition:border-color .2s, box-shadow .2s;
+  min-height:40px; box-sizing:border-box;
 }
-.nt-book-search-wrap input:focus{ border-color:var(--primary); box-shadow:var(--ring); }
-.nt-book-drop{
-  position:absolute; left:0; right:0; top:100%; z-index:30;
-  background:var(--card); border:1px solid var(--border); border-radius:0 0 var(--radius-input) var(--radius-input);
-  max-height:200px; overflow-y:auto; box-shadow:var(--shadow-hover);
-  display:block; margin-top:-1px;
+.nt-book-trigger:hover{ border-color:#C5DDD2; }
+.nt-book-trigger:focus{ border-color:var(--primary); box-shadow:var(--ring); outline:none; }
+.nt-book-trigger-txt{ font-size:14px; color:var(--text); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.nt-book-trigger-txt .nt-ph{ color:var(--muted); font-size:13px; }
+.nt-book-arrow{ color:var(--muted); font-size:11px; margin-left:8px; flex-shrink:0; transition:transform .2s; }
+.nt-book-picker[open] .nt-book-arrow{ transform:rotate(180deg); }
+
+/* 下拉面板：搜索框 + 书单列表 */
+.nt-book-panel{
+  position:absolute; left:0; right:0; top:100%; z-index:999;
+  background:var(--card); border:1px solid var(--border);
+  border-top:none; border-radius:0 0 var(--radius-input) var(--radius-input);
+  box-shadow:0 10px 30px rgba(47,59,53,0.15), 0 4px 10px rgba(47,59,53,0.08);
+  margin-top:-1px;
 }
-.nt-book-drop[hidden]{ display:none; }
-.nt-book-drop-item{
-  padding:10px 14px; cursor:pointer; font-size:13.5px; color:var(--text);
-  border-bottom:1px solid var(--faint, #f5f7f6); transition:background .15s;
-  display:flex; align-items:center; gap:8px;
+.nt-book-panel[hidden]{ display:none !important; }
+.nt-book-srch{
+  width:100%; border:none; border-bottom:1px solid var(--border);
+  padding:10px 12px; font-size:13.5px; outline:none;
+  background:rgba(79,166,126,0.03); box-sizing:border-box;
+  border-radius:0 0 var(--radius-input) var(--radius-input) 0 0;
 }
-.nt-book-drop-item:last-child{ border-bottom:none; }
-.nt-book-drop-item:hover{ background:var(--hover); }
-.nt-book-drop-item.active{ background:var(--primary-soft); color:var(--primary-deep); font-weight:600; }
-.nt-book-drop-empty{ padding:14px; text-align:center; color:var(--muted); font-size:13px; }
+.nt-book-srch::placeholder{ color:var(--muted); }
+.nt-book-srch:focus{ background:rgba(79,166,126,0.06); }
+
+.nt-book-list{ max-height:220px; overflow-y:auto; overflow-x:hidden; padding:4px 0; -webkit-overflow-scrolling:touch; }
+.nt-book-opt{
+  display:flex; flex-direction:column; gap:1px;
+  padding:10px 14px; cursor:pointer; transition:background .15s;
+  border-bottom:1px solid #f5f7f6;
+}
+.nt-book-opt:last-child{ border-bottom:none; }
+.nt-book-opt:hover{ background:var(--hover); }
+.nt-book-opt.sel{ background:var(--primary-soft); }
+.nt-book-opt.sel .nt-opt-title{ color:var(--primary-deep); font-weight:600; }
+.nt-opt-title{ font-size:14px; color:var(--text); line-height:1.3; }
+.nt-opt-author{ font-size:12px; color:var(--muted); }
+.nt-book-empty{ padding:18px; text-align:center; color:var(--muted); font-size:13px; }
 
 .rd-year-summary{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:16px; }
 .rd-year-cell{ background:var(--bg); border-radius:12px; padding:12px; }
@@ -862,7 +885,7 @@ body{
   .rd-note-group-h{ padding:10px 12px; font-size:13px; }
   .rd-note-group-body{ padding:6px 8px 10px; }
   .rd-note{ padding:10px 12px; }
-  .nt-book-drop{ max-height:160px; }
+  .nt-book-list{ max-height:160px; }
 }
 
 /* ============ 锻炼身体模块 ============ */

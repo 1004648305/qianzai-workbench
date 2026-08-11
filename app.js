@@ -819,7 +819,14 @@
     var preBookTitle = preBook ? (state.reading.find(function (x) { return x.id === preBook; }) || {}).title : '';
     $('modalTitle').textContent = n ? '编辑笔记' : '记笔记';
     $('modalBody').innerHTML =
-      '<label>关联书籍 *<div class="nt-book-search-wrap"><input type="text" id="nt-book-search" placeholder="搜索书名…" value="' + (preBookTitle ? esc(preBookTitle) : '') + '" autocomplete="off"/><input type="hidden" id="nt-book" value="' + (preBook || '') + '"/></div><div class="nt-book-drop" id="nt-book-drop"></div></label>' +
+      '<label>关联书籍 *<div class="nt-book-picker" id="nt-book-picker">' +
+        '<div class="nt-book-trigger" id="nt-book-trigger"><span class="nt-book-trigger-txt">' + (preBookTitle ? esc(preBookTitle) : '<span class="nt-ph">点击选择书籍…</span>') + '</span><span class="nt-book-arrow">▾</span></div>' +
+        '<div class="nt-book-panel" id="nt-book-panel" hidden>' +
+          '<input type="text" class="nt-book-srch" id="nt-book-srch" placeholder="搜索书名…" autocomplete="off"/>' +
+          '<div class="nt-book-list" id="nt-book-list"></div>' +
+        '</div>' +
+        '<input type="hidden" id="nt-book" value="' + (preBook || '') + '"/>' +
+      '</div></label>' +
       '<label>笔记类型<select id="nt-type">' +
         ['摘抄', '所悟'].map(function (t) { return '<option value="' + t + '"' + (n && n.type === t ? ' selected' : (!n && t === '摘抄' ? ' selected' : '')) + '>' + t + '</option>'; }).join('') +
       '</select></label>' +
@@ -829,83 +836,96 @@
     $('ntSave').onclick = function () { saveNote(n); };
     $('ntCancel').onclick = closeModal;
     showModal();
-    // 初始化关联书籍搜索下拉
-    initNoteBookSearch(preBook || '');
+    initNoteBookPicker(preBook || '');
   }
 
-  // 关联书籍搜索下拉组件
-  function initNoteBookSearch(selectedId) {
-    var searchInput = $('nt-book-search');
-    var hiddenInput = $('nt-book');
-    var dropEl = $('nt-book-drop');
-    if (!searchInput || !dropEl) return;
+  // 关联书籍可搜索下拉选择器
+  function initNoteBookPicker(selectedId) {
+    var picker = $('nt-book-picker');
+    var trigger = $('nt-book-trigger');
+    var panel = $('nt-book-panel');
+    var srchInput = $('nt-book-srch');
+    var listEl = $('nt-book-list');
+    var hidden = $('nt-book');
+    if (!picker || !panel) return;
 
-    function autoSelectByInput(val) {
-      /* 输入值变化时尝试自动匹配：精确匹配优先，唯一模糊匹配次之 */
-      val = (val || '').trim();
-      if (!val) { hiddenInput.value = ''; return; }
-      var exact = state.reading.find(function (b) { return b.title.toLowerCase() === val.toLowerCase(); });
-      if (exact) { hiddenInput.value = exact.id; return; }
-      var fuzzy = state.reading.filter(function (b) { return b.title.toLowerCase().indexOf(val.toLowerCase()) !== -1; });
-      if (fuzzy.length === 1) { hiddenInput.value = fuzzy[0].id; }
-      else { hiddenInput.value = ''; }
-    }
+    var open = false;
 
-    function renderDrop(filter) {
+    function renderList(filter) {
       filter = (filter || '').toLowerCase();
-      var list = state.reading.filter(function (b) {
-        return !filter || b.title.toLowerCase().indexOf(filter) !== -1;
+      var items = state.reading.filter(function (b) {
+        return !filter || b.title.toLowerCase().indexOf(filter) !== -1 || (b.author && b.author.toLowerCase().indexOf(filter) !== -1);
       });
-      if (!list.length) {
-        dropEl.innerHTML = '<div class="nt-book-drop-empty">没有匹配的书籍</div>';
-        dropEl.hidden = false; return;
+      if (!items.length) {
+        listEl.innerHTML = '<div class="nt-book-empty">没有匹配的书籍</div>';
+        return;
       }
-      dropEl.innerHTML = list.map(function (b) {
-        return '<div class="nt-book-drop-item' + (b.id === selectedId ? ' active' : '') + '" data-bid="' + b.id + '">' + esc(b.title) + (b.author ? ' · ' + esc(b.author) : '') + '</div>';
+      listEl.innerHTML = items.map(function (b) {
+        return '<div class="nt-book-opt' + (b.id === selectedId ? ' sel' : '') + '" data-bid="' + b.id + '">' +
+          '<span class="nt-opt-title">' + esc(b.title) + '</span>' +
+          (b.author ? '<span class="nt-opt-author">' + esc(b.author) + '</span>' : '') +
+        '</div>';
       }).join('');
-      dropEl.hidden = false;
-      dropEl.querySelectorAll('.nt-book-drop-item').forEach(function (item) {
-        item.addEventListener('click', function () {
-          selectedId = item.getAttribute('data-bid');
-          hiddenInput.value = selectedId;
+      listEl.querySelectorAll('.nt-book-opt').forEach(function (el) {
+        el.addEventListener('click', function () {
+          selectedId = el.getAttribute('data-bid');
+          hidden.value = selectedId;
           var bk = state.reading.find(function (x) { return x.id === selectedId; });
-          searchInput.value = bk ? bk.title : '';
-          dropEl.hidden = true;
+          trigger.querySelector('.nt-book-trigger-txt').innerHTML = bk ? esc(bk.title) : '<span class="nt-ph">点击选择书籍…</span>';
+          srchInput.value = '';
+          closePanel();
+          renderList('');
         });
       });
     }
 
-    searchInput.addEventListener('focus', function () { renderDrop(searchInput.value); });
-    searchInput.addEventListener('input', function () {
-      renderDrop(searchInput.value);
-      autoSelectByInput(searchInput.value);
-    });
-    /* 失焦时兜底：如果用户打了字但没点选，尝试智能匹配 */
-    searchInput.addEventListener('blur', function () {
+    function openPanel() {
+      open = true;
+      panel.hidden = false;
+      renderList(srchInput.value);
+      srchInput.focus();
+      /* 滚动到选中项 */
       setTimeout(function () {
-        if (!hiddenInput.value && searchInput.value.trim()) {
-          autoSelectByInput(searchInput.value);
-          /* 如果还是没匹配上，清空输入提示用户选择 */
-          if (!hiddenInput.value) {
-            /* 保留用户输入的文字以便继续编辑，不强制清空 */
-          }
-        }
-      }, 200);
+        var sel = listEl.querySelector('.nt-book-opt.sel');
+        if (sel) { listEl.scrollTop = sel.offsetTop - listEl.offsetTop - 8; }
+      }, 50);
+    }
+
+    function closePanel() {
+      open = false;
+      panel.hidden = true;
+    }
+
+    function togglePanel() {
+      if (open) closePanel(); else openPanel();
+    }
+
+    /* 点击触发器切换 */
+    trigger.addEventListener('click', function (e) { e.stopPropagation(); togglePanel(); });
+
+    /* 搜索输入 */
+    srchInput.addEventListener('input', function () { renderList(srchInput.value); });
+    srchInput.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    /* 阻止面板内点击冒泡（避免触发外部关闭） */
+    panel.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    /* 点击外部关闭 */
+    document.addEventListener('click', function (e) {
+      if (open && !picker.contains(e.target)) closePanel();
     });
-    // 点击外部关闭
-    setTimeout(function () {
-      document.addEventListener('click', function handler(e) {
-        if (!e.target.closest('.nt-book-search-wrap') && !e.target.closest('.nt-book-drop')) {
-          dropEl.hidden = true;
-        }
-      });
-    }, 0);
-    if (selectedId) renderDrop('');
-    else { searchInput.value = ''; renderDrop(''); }
+
+    /* ESC 关闭 */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && open) { e.preventDefault(); closePanel(); }
+    });
+
+    /* 初始渲染列表（但不展开） */
+    renderList('');
   }
   function saveNote(old) {
     var bookId = $('nt-book').value;
-    if (!bookId) { var sv = ($('nt-book-search') || {}).value || ''; toast(sv ? '请从搜索列表中点击选择「' + sv + '」' : '请先选择关联书籍（在书架添加一本书）', 'err'); return; }
+    if (!bookId) { var tt = ($('nt-book-trigger-txt') || {}).textContent || ''; toast(tt && !tt.includes('选择书籍') ? '请点击关联书籍框选择「' + tt.trim() + '」' : '请先点击选择关联书籍', 'err'); return; }
     var content = $('nt-content').value.trim();
     if (!content) { toast('请填写笔记内容', 'err'); return; }
     if (!state.reading.some(function (b) { return b.id === bookId; })) { toast('关联的书籍不存在', 'err'); return; }
