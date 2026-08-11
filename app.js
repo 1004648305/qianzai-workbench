@@ -839,6 +839,18 @@
     var hiddenInput = $('nt-book');
     var dropEl = $('nt-book-drop');
     if (!searchInput || !dropEl) return;
+
+    function autoSelectByInput(val) {
+      /* 输入值变化时尝试自动匹配：精确匹配优先，唯一模糊匹配次之 */
+      val = (val || '').trim();
+      if (!val) { hiddenInput.value = ''; return; }
+      var exact = state.reading.find(function (b) { return b.title.toLowerCase() === val.toLowerCase(); });
+      if (exact) { hiddenInput.value = exact.id; return; }
+      var fuzzy = state.reading.filter(function (b) { return b.title.toLowerCase().indexOf(val.toLowerCase()) !== -1; });
+      if (fuzzy.length === 1) { hiddenInput.value = fuzzy[0].id; }
+      else { hiddenInput.value = ''; }
+    }
+
     function renderDrop(filter) {
       filter = (filter || '').toLowerCase();
       var list = state.reading.filter(function (b) {
@@ -852,7 +864,6 @@
         return '<div class="nt-book-drop-item' + (b.id === selectedId ? ' active' : '') + '" data-bid="' + b.id + '">' + esc(b.title) + (b.author ? ' · ' + esc(b.author) : '') + '</div>';
       }).join('');
       dropEl.hidden = false;
-      // 绑定点击
       dropEl.querySelectorAll('.nt-book-drop-item').forEach(function (item) {
         item.addEventListener('click', function () {
           selectedId = item.getAttribute('data-bid');
@@ -863,8 +874,24 @@
         });
       });
     }
+
     searchInput.addEventListener('focus', function () { renderDrop(searchInput.value); });
-    searchInput.addEventListener('input', function () { renderDrop(searchInput.value); });
+    searchInput.addEventListener('input', function () {
+      renderDrop(searchInput.value);
+      autoSelectByInput(searchInput.value);
+    });
+    /* 失焦时兜底：如果用户打了字但没点选，尝试智能匹配 */
+    searchInput.addEventListener('blur', function () {
+      setTimeout(function () {
+        if (!hiddenInput.value && searchInput.value.trim()) {
+          autoSelectByInput(searchInput.value);
+          /* 如果还是没匹配上，清空输入提示用户选择 */
+          if (!hiddenInput.value) {
+            /* 保留用户输入的文字以便继续编辑，不强制清空 */
+          }
+        }
+      }, 200);
+    });
     // 点击外部关闭
     setTimeout(function () {
       document.addEventListener('click', function handler(e) {
@@ -873,13 +900,12 @@
         }
       });
     }, 0);
-    // 如果有预选值，先渲染一次但不展开（用户 focus 时再展开）
     if (selectedId) renderDrop('');
     else { searchInput.value = ''; renderDrop(''); }
   }
   function saveNote(old) {
     var bookId = $('nt-book').value;
-    if (!bookId) { toast('请先选择关联书籍（在书架添加一本书）', 'err'); return; }
+    if (!bookId) { var sv = ($('nt-book-search') || {}).value || ''; toast(sv ? '请从搜索列表中点击选择「' + sv + '」' : '请先选择关联书籍（在书架添加一本书）', 'err'); return; }
     var content = $('nt-content').value.trim();
     if (!content) { toast('请填写笔记内容', 'err'); return; }
     if (!state.reading.some(function (b) { return b.id === bookId; })) { toast('关联的书籍不存在', 'err'); return; }
