@@ -476,13 +476,13 @@
   /* ============ 模块1：每月阅读（私人阅读手帐） ============ */
   var readingTab = 'shelf';   // shelf | notes
   var rdView = 'wishlist';      // wishlist | reading | done
-  var rdNoteView = 'time';    // time | book
+  var rdNoteView = 'book';    // 始终按书籍分组（已取消按时间）
   var rbRating = 0;           // 书籍编辑弹窗中的评分
 
   // 旧数据迁移：旧记录(date/status/rating/excerpt/thought) -> 书籍 + 笔记
   function migrateReading() {
     if (!state.reading.some(function (r) { return r.createdAt === undefined; })) return;
-    var smap = { '在读': '正在读', '读完': '读完', '弃读': '想读' };
+    var smap = { '在读': '在读', '读完': '读完', '弃读': '想读' };
     var newBooks = [], newNotes = [];
     state.reading.forEach(function (r) {
       if (r.createdAt !== undefined) { newBooks.push(r); return; }
@@ -524,7 +524,7 @@
   }
   function statusTag(status) {
     var map = {
-      '正在读': { t: '在读中', bg: '#EAF4EE', c: '#3C8C68' },
+      '在读': { t: '在读中', bg: '#EAF4EE', c: '#3C8C68' },
       '读完': { t: '已读完', bg: '#E6F4EC', c: '#2FAE72' },
       '想读': { t: '想读', bg: '#EEF3F0', c: '#7E8F86' }
     };
@@ -538,7 +538,7 @@
   function bookTitle(id) { var b = state.reading.find(function (x) { return x.id === id; }); return b ? b.title : '未知'; }
 
   function renderReadingSummary() {
-    var reading = state.reading.filter(function (b) { return b.status === '正在读'; }).length;
+    var reading = state.reading.filter(function (b) { return b.status === '在读'; }).length;
     var doneBooks = finishedThisYear();
     var done = doneBooks.length;
     var goal = state.readingGoal || 24;
@@ -582,7 +582,7 @@
   function renderShelf() {
     var books = state.reading.slice().sort(function (a, b) { return (b.createdAt || '') < (a.createdAt || '') ? -1 : 1; });
     if (rdView === 'wishlist') books = books.filter(function (b) { return b.status === '想读'; });
-    else if (rdView === 'reading') books = books.filter(function (b) { return b.status === '正在读'; });
+    else if (rdView === 'reading') books = books.filter(function (b) { return b.status === '在读'; });
     else if (rdView === 'done') books = books.filter(function (b) { return b.status === '读完'; });
     var box = $('rdGrid');
     if (!books.length) {
@@ -596,7 +596,7 @@
       } else if (rdView === 'done') {
         box.innerHTML = emptyState('📭', '今年还没读完书，继续加油');
       } else if (rdView === 'reading') {
-        box.innerHTML = emptyState('📖', '正在读的书还没添加');
+        box.innerHTML = emptyState('📖', '在读的书还没添加');
       } else {
         box.innerHTML = emptyState('💭', '还没有想读的书，去添加吧');
       }
@@ -605,7 +605,7 @@
     box.innerHTML = books.map(function (b) {
       var actions;
       if (b.status === '想读') actions = '<button class="btn ghost sm rd-act" data-act="start" data-mod="book" data-id="' + b.id + '">开始阅读</button>';
-      else if (b.status === '正在读') actions = '<button class="btn ghost sm rd-act" data-act="finish" data-mod="book" data-id="' + b.id + '">标记读完</button>';
+      else if (b.status === '在读') actions = '<button class="btn ghost sm rd-act" data-act="finish" data-mod="book" data-id="' + b.id + '">标记读完</button>';
       else actions = '<div class="rd-done-stars">' + starsHTML(b.rating) + '</div>';
       return '<div class="rd-book" data-act="detail" data-mod="book" data-id="' + b.id + '">' +
         '<div class="rd-book-cover">' + bookCoverHTML(b, 'rd-cover') + '</div>' +
@@ -633,6 +633,9 @@
         '<button class="icon-btn" data-act="del-note" data-mod="note" data-id="' + n.id + '" title="删除">🗑️</button></span></div>' +
       '<div class="rd-note-content">' + esc(n.content) + '</div></div>';
   }
+  // 笔记分组折叠状态（bookId => bool）
+  var rdNoteCollapsed = {};
+
   function renderNotes() {
     var box = $('rdNotesList');
     var notes = state.notes.slice().sort(function (a, b) { return (b.createdAt || '') < (a.createdAt || '') ? -1 : 1; });
@@ -644,24 +647,48 @@
       '</div>';
       return;
     }
+    // 搜索过滤
+    var kw = ($('rdNoteSearch') && $('rdNoteSearch').value || '').trim().toLowerCase();
+    if (kw) {
+      notes = notes.filter(function (n) {
+        var b = state.reading.find(function (x) { return x.id === n.bookId; });
+        return b && b.title.toLowerCase().indexOf(kw) !== -1;
+      });
+    }
     var html = '';
     if (notes.length >= 10) {
       var pick = notes[Math.floor(Math.random() * notes.length)];
       html += '<div class="rd-revisit">💡 重温一条你的笔记：<b>' + esc(bookTitle(pick.bookId)) + '</b> · ' + esc(pick.content) + '</div>';
     }
-    if (rdNoteView === 'book') {
-      var byBook = {};
-      notes.forEach(function (n) { (byBook[n.bookId] = byBook[n.bookId] || []).push(n); });
-      html += Object.keys(byBook).map(function (bid) {
-        var bk = state.reading.find(function (x) { return x.id === bid; });
-        var items = byBook[bid].slice().sort(function (a, b) { return (b.createdAt || '') < (a.createdAt || '') ? -1 : 1; });
-        return '<div class="rd-note-group"><div class="rd-note-group-h">📘 ' + esc(bk ? bk.title : '（已删除的书）') + '（' + items.length + '）</div>' +
-          items.map(function (n) { return noteCard(n); }).join('') + '</div>';
-      }).join('');
-    } else {
-      html += notes.map(function (n) { return noteCard(n); }).join('');
+    // 始终按书籍分组
+    var byBook = {};
+    notes.forEach(function (n) { (byBook[n.bookId] = byBook[n.bookId] || []).push(n); });
+    html += Object.keys(byBook).map(function (bid) {
+      var bk = state.reading.find(function (x) { return x.id === bid; });
+      var items = byBook[bid].slice().sort(function (a, b) { return (b.createdAt || '') < (a.createdAt || '') ? -1: 1; });
+      var collapsed = !!rdNoteCollapsed[bid];
+      return '<div class="rd-note-group" data-book-id="' + bid + '">' +
+        '<div class="rd-note-group-h" data-toggle-book="' + bid + '">' +
+          '<span class="rd-note-group-arrow">' + (collapsed ? '▶' : '▼') + '</span>' +
+          '📘 ' + esc(bk ? bk.title : '（已删除的书）') + '（' + items.length + '）</div>' +
+        (collapsed ? '' : '<div class="rd-note-group-body">' + items.map(function (n) { return noteCard(n); }).join('') + '</div>') +
+      '</div>';
+    }).join('');
+    if (kw && !html) {
+      html = '<div class="rd-notes-empty"><div class="rd-empty-title">没有匹配"'+esc(kw)+'"的笔记</div></div>';
     }
     box.innerHTML = html;
+    // 绑定折叠事件
+    var headers = box.querySelectorAll('.rd-note-group-h');
+    for (var i = 0; i < headers.length; i++) {
+      (function (h) {
+        h.addEventListener('click', function () {
+          var bid = h.getAttribute('data-toggle-book');
+          rdNoteCollapsed[bid] = !rdNoteCollapsed[bid];
+          renderNotes();
+        });
+      })(headers[i]);
+    }
   }
   function openBookDetail(id) {
     var b = state.reading.find(function (x) { return x.id === id; }); if (!b) return;
@@ -694,7 +721,7 @@
       '<label>书名 *<input type="text" id="rb-title" placeholder="书名" value="' + (b ? esc(b.title) : '') + '"/></label>' +
       '<label>作者<input type="text" id="rb-author" placeholder="作者" value="' + (b ? esc(b.author || '') : '') + '"/></label>' +
       '<label>阅读状态<select id="rb-status">' +
-        ['想读', '正在读', '读完'].map(function (s) { return '<option value="' + s + '"' + (b && b.status === s ? ' selected' : (!b && s === '想读' ? ' selected' : '')) + '>' + s + '</option>'; }).join('') +
+        ['想读', '在读', '读完'].map(function (s) { return '<option value="' + s + '"' + (b && b.status === s ? ' selected' : (!b && s === '想读' ? ' selected' : '')) + '>' + s + '</option>'; }).join('') +
       '</select></label>' +
       '<div class="grid-2">' +
         '<label>总页数<input type="number" id="rb-total" min="0" placeholder="选填" value="' + (b && b.totalPages ? b.totalPages : '') + '"/></label>' +
@@ -755,7 +782,7 @@
     if (status === '读完' && !b.finishDate) b.finishDate = TODAY;
     saveState(); renderReading(); renderOverview();
     if (status === '读完') { toast('🎉 读完啦！给个评分吧', 'ok'); openRateModal(id); }
-    else if (status === '正在读') { toast('开始阅读：' + b.title, 'ok'); }
+    else if (status === '在读') { toast('开始阅读：' + b.title, 'ok'); }
   }
   function openRateModal(id) {
     var b = state.reading.find(function (x) { return x.id === id; }); if (!b) return;
@@ -788,11 +815,11 @@
     editing.note = noteId || null;
     var n = noteId ? state.notes.find(function (x) { return x.id === noteId; }) : null;
     var preBook = bookId || (n ? n.bookId : '');
-    var opts = state.reading.map(function (b) { return '<option value="' + b.id + '"' + (b.id === preBook ? ' selected' : '') + '>' + esc(b.title) + '</option>'; }).join('');
-    if (!opts) opts = '<option value="">（请先在书架添加一本书）</option>';
+    var books = state.reading.slice();
+    var preBookTitle = preBook ? (state.reading.find(function (x) { return x.id === preBook; }) || {}).title : '';
     $('modalTitle').textContent = n ? '编辑笔记' : '记笔记';
     $('modalBody').innerHTML =
-      '<label>关联书籍 *<select id="nt-book">' + opts + '</select></label>' +
+      '<label>关联书籍 *<div class="nt-book-search-wrap"><input type="text" id="nt-book-search" placeholder="搜索书名…" value="' + (preBookTitle ? esc(preBookTitle) : '') + '" autocomplete="off"/><input type="hidden" id="nt-book" value="' + (preBook || '') + '"/></div><div class="nt-book-drop" id="nt-book-drop"></div></label>' +
       '<label>笔记类型<select id="nt-type">' +
         ['摘抄', '所悟'].map(function (t) { return '<option value="' + t + '"' + (n && n.type === t ? ' selected' : (!n && t === '摘抄' ? ' selected' : '')) + '>' + t + '</option>'; }).join('') +
       '</select></label>' +
@@ -802,6 +829,53 @@
     $('ntSave').onclick = function () { saveNote(n); };
     $('ntCancel').onclick = closeModal;
     showModal();
+    // 初始化关联书籍搜索下拉
+    initNoteBookSearch(preBook || '');
+  }
+
+  // 关联书籍搜索下拉组件
+  function initNoteBookSearch(selectedId) {
+    var searchInput = $('nt-book-search');
+    var hiddenInput = $('nt-book');
+    var dropEl = $('nt-book-drop');
+    if (!searchInput || !dropEl) return;
+    function renderDrop(filter) {
+      filter = (filter || '').toLowerCase();
+      var list = state.reading.filter(function (b) {
+        return !filter || b.title.toLowerCase().indexOf(filter) !== -1;
+      });
+      if (!list.length) {
+        dropEl.innerHTML = '<div class="nt-book-drop-empty">没有匹配的书籍</div>';
+        dropEl.hidden = false; return;
+      }
+      dropEl.innerHTML = list.map(function (b) {
+        return '<div class="nt-book-drop-item' + (b.id === selectedId ? ' active' : '') + '" data-bid="' + b.id + '">' + esc(b.title) + (b.author ? ' · ' + esc(b.author) : '') + '</div>';
+      }).join('');
+      dropEl.hidden = false;
+      // 绑定点击
+      dropEl.querySelectorAll('.nt-book-drop-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          selectedId = item.getAttribute('data-bid');
+          hiddenInput.value = selectedId;
+          var bk = state.reading.find(function (x) { return x.id === selectedId; });
+          searchInput.value = bk ? bk.title : '';
+          dropEl.hidden = true;
+        });
+      });
+    }
+    searchInput.addEventListener('focus', function () { renderDrop(searchInput.value); });
+    searchInput.addEventListener('input', function () { renderDrop(searchInput.value); });
+    // 点击外部关闭
+    setTimeout(function () {
+      document.addEventListener('click', function handler(e) {
+        if (!e.target.closest('.nt-book-search-wrap') && !e.target.closest('.nt-book-drop')) {
+          dropEl.hidden = true;
+        }
+      });
+    }, 0);
+    // 如果有预选值，先渲染一次但不展开（用户 focus 时再展开）
+    if (selectedId) renderDrop('');
+    else { searchInput.value = ''; renderDrop(''); }
   }
   function saveNote(old) {
     var bookId = $('nt-book').value;
@@ -3645,7 +3719,7 @@
         if (act === 'detail') openBookDetail(id);
         else if (act === 'edit-book') openBookModal(id);
         else if (act === 'del-book') deleteBook(id);
-        else if (act === 'start') markStatus(id, '正在读');
+        else if (act === 'start') markStatus(id, '在读');
         else if (act === 'finish') markStatus(id, '读完');
         return;
       }
@@ -3763,10 +3837,15 @@
       var b = e.target.closest('[data-rview]'); if (!b) return;
       rdView = b.getAttribute('data-rview'); setSegActive($('rdViewSeg'), b); renderReading();
     });
-    $('rdNoteViewSeg').addEventListener('click', function (e) {
-      var b = e.target.closest('[data-nview]'); if (!b) return;
-      rdNoteView = b.getAttribute('data-nview'); setSegActive($('rdNoteViewSeg'), b); renderReading();
-    });
+    // 笔记搜索（防抖）
+    var noteSearchTimer = null;
+    var rdNoteSearchEl = $('rdNoteSearch');
+    if (rdNoteSearchEl) {
+      rdNoteSearchEl.addEventListener('input', function () {
+        clearTimeout(noteSearchTimer);
+        noteSearchTimer = setTimeout(function () { renderNotes(); }, 250);
+      });
+    }
 
     // ===== 锻炼身体模块 =====
     $('exFab').addEventListener('click', function () { openExerciseModal(); });

@@ -81,10 +81,8 @@
         <!-- Tab 2：笔记 -->
         <div class="card rd-pane" data-rdpane="notes" id="rdNotesPane" hidden>
           <div class="list-toolbar">
-            <div class="seg" id="rdNoteViewSeg">
-              <button class="active" data-nview="time">按时间</button>
-              <button data-nview="book">按书籍</button>
-            </div>
+            <span class="rd-notes-label">📚 按书籍分组</span>
+            <input class="rd-note-search" id="rdNoteSearch" type="text" placeholder="搜索书名…" />
           </div>
           <div id="rdNotesList"></div>
         </div>
