@@ -1257,3 +1257,122 @@ body{
   .ov-grid{ grid-template-columns:repeat(4,1fr) !important; gap:20px !important; }
   .list{ grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:18px !important; }
 }
+
+/* ============ 每日小事模块（月历日记） ============ */
+.dn-header{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:16px 22px; margin-bottom:14px; position:relative;
+}
+.dn-header-left{ flex:1; min-width:0; }
+.dn-year-month{ font-size:28px; font-weight:700; color:var(--text); line-height:1.2; }
+.dn-year-month .dn-y{ color:var(--primary-deep); }
+.dn-solar-info{ display:flex; flex-wrap:wrap; gap:8px 20px; margin-top:8px; font-size:13px; color:var(--muted); align-items:center; }
+.dn-solar-info .dn-solar-term{ font-weight:600; color:var(--primary-deep); }
+.dn-lunar-info{ font-size:12.5px; color:var(--muted); margin-top:4px; }
+.dn-header-right{ flex:0 0 auto; text-align:center; }
+.dn-mascot{ width:72px; height:72px; border-radius:16px; background:linear-gradient(135deg,#FFF5E6,#FFE8CC); display:flex; align-items:center; justify-content:center; font-size:36px; box-shadow:0 2px 10px rgba(79,166,126,0.10); }
+
+/* 日历导航 */
+.dn-cal-nav{ display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:14px; }
+.dn-cal-nav button{ width:36px; height:36px; border-radius:50%; border:1px solid var(--border); background:var(--card); cursor:pointer; font-size:16px; color:var(--text); display:flex; align-items:center; justify-content:center; transition:all .2s; }
+.dn-cal-nav button:hover{ background:var(--hover); border-color:var(--primary); }
+
+/* 星期标题行 */
+.dn-cal-weekdays{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:6px; }
+.dn-cal-wd{ text-align:center; font-size:12px; font-weight:600; color:var(--muted); padding:6px 0; border-radius:8px; background:transparent; }
+.dn-cal-wd.weekend{ color:var(--expense); }
+
+/* 日历网格 */
+.dn-calendar-wrap{ padding:16px 18px; overflow-x:auto; }
+.dn-cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; min-width:100%; }
+
+/* 日期格子 */
+.dn-cell{
+  position:relative; aspect-ratio:1/1; min-height:64px;
+  border-radius:10px; border:1.5px solid var(--border);
+  background:var(--card); cursor:pointer;
+  display:flex; flex-direction:column; padding:5px 6px;
+  transition:all .2s ease; overflow:hidden;
+}
+.dn-cell:hover{ border-color:var(--primary); box-shadow:0 2px 8px rgba(79,166,126,0.12); transform:translateY(-1px); z-index:2; }
+.dn-cell.empty{ background:transparent; border:none; cursor:default; }
+.dn-cell.empty:hover{ transform:none; box-shadow:none; }
+.dn-cell.today{ border-color:var(--primary); border-width:2px; background:linear-gradient(135deg,#F6FBF8,#EDF5EF); }
+.dn-cell.selected{ outline:2px solid var(--primary-deep); outline-offset:-2px; z-index:3; }
+.dn-cell.other-month{ opacity:.45; }
+.dn-cell.weekend .dn-day-num{ color:var(--expense); }
+
+.dn-day-num{ font-size:13px; font-weight:600; color:var(--text); line-height:1; flex:0 0 auto; }
+.dn-day-lunar{ font-size:9.5px; color:var(--muted); line-height:1; margin-top:1px; flex:0 0 auto; }
+.dn-cell.today .dn-day-num{ color:var(--primary-deep); }
+
+/* 日期格子里的小事预览 */
+.dn-preview{ flex:1; overflow:hidden; display:flex; flex-direction:column; gap:1px; margin-top:2px; min-height:0; }
+.dn-preview-line{ font-size:10px; color:var(--text); line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:rgba(79,166,126,0.06); border-radius:3px; padding:1px 4px; }
+.dn-has-dot::after{
+  content:''; position:absolute; right:5px; bottom:4px;
+  width:6px; height:6px; border-radius:50%; background:var(--primary);
+}
+
+/* 详情/编辑区 */
+.dn-detail{ margin-top:14px; }
+.dn-detail-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.dn-detail-date{ font-size:17px; font-weight:700; color:var(--primary-deep); }
+.dn-detail-actions{ display:flex; gap:6px; }
+.dn-detail-list{ display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; }
+.dn-item{
+  display:flex; align-items:flex-start; gap:10px; padding:10px 12px;
+  background:var(--bg); border-radius:10px; border:1px solid var(--border);
+  transition:background .15s;
+}
+.dn-item:hover{ background:var(--hover); }
+.dn-item-text{ flex:1; font-size:13.5px; color:var(--text); line-height:1.55; white-space:pre-wrap; word-break:break-word; }
+.dn-item-time{ font-size:11px; color:var(--muted); flex:0 0 auto; }
+.dn-item-ops{ display:flex; gap:4px; flex:0 0 auto; }
+
+/* 添加/编辑弹窗内的表单 */
+.dn-form-area{ width:100%; }
+.dn-form-area textarea{
+  width:100%; min-height:80px; max-height:200px;
+  font-family:var(--font); font-size:14px; color:var(--text);
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius-input);
+  padding:10px 12px; outline:none; resize:vertical;
+  transition:border-color .2s, box-shadow .2s;
+  line-height:1.6; box-sizing:border-box;
+}
+.dn-form-area textarea:focus{ border-color:var(--primary); box-shadow:var(--ring); }
+.dn-form-hint{ font-size:11.5px; color:var(--muted); margin-top:4px; }
+
+/* 空状态 */
+.dn-empty{ text-align:center; padding:24px 0; color:var(--muted); font-size:13px; }
+.dn-empty-icon{ font-size:36px; margin-bottom:8px; }
+
+/* FAB 按钮专用色 */
+.panel[data-panel="dailynotes"] .fab{ background:linear-gradient(135deg,#E8A87C,#D4745C); box-shadow:0 8px 20px rgba(212,116,92,0.38); }
+.panel[data-panel="dailynotes"] .fab:hover{ background:linear-gradient(135deg,#D4745C,#B85E48); }
+
+@media (max-width:680px){
+  .dn-header{ flex-direction:column; align-items:center; text-align:center; padding:14px 16px; }
+  .dn-year-month{ font-size:22px; }
+  .dn-solar-info{ justify-content:center; }
+  .dn-mascot{ width:56px; height:56px; font-size:28px; }
+  .dn-cell{ min-height:52px; padding:4px 5px; border-radius:8px; border-width:1.2px; }
+  .dn-day-num{ font-size:11.5px; }
+  .dn-day-lunar{ font-size:8.5px; }
+  .dn-preview-line{ font-size:9px; padding:1px 3px; }
+  .dn-cal-grid{ gap:3px; }
+  .dn-detail-date{ font-size:15px; }
+  .dn-item-text{ font-size:12.5px; }
+}
+
+@media (min-width:768px){
+  .dn-cell{ min-height:80px; padding:7px 8px; }
+  .dn-day-num{ font-size:14px; }
+  .dn-day-lunar{ font-size:10.5px; }
+  .dn-preview-line{ font-size:11px; }
+  .dn-cal-grid{ gap:5px; }
+}
+
+@media (min-width:1200px){
+  .dn-cell{ min-height:90px; padding:8px 10px; }
+}
