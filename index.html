@@ -21,6 +21,8 @@
     <div class="splash-text">倩崽工作台</div>
     <div class="splash-sub">正在加载...</div>
   </div>
+  <!-- 兜底：无论后续 JS 是否正常执行，1.5s 后强制移除启动画面 -->
+  <script>(function(){var s=document.getElementById('splashScreen');if(s)setTimeout(function(){s.style.transition='opacity .4s';s.style.opacity='0';setTimeout(function(){if(s.parentNode)s.parentNode.removeChild(s);},450);},1500);})();</script>
 
   <!-- 侧边导航 -->
   <aside class="sidebar" id="sidebar">
