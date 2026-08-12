@@ -92,6 +92,24 @@
       });
     }
 
+    /* 密码错误时：明确提示 + 允许重试 / 仅本地使用（避免无限弹窗困住用户） */
+    function showPassRetry() {
+      $('modalTitle').textContent = '同步密码错误';
+      $('modalBody').innerHTML =
+        '<p class="muted-tip">输入的密码无法解密云端数据。请确认你与各设备使用的是<b>同一个</b>同步密码。' +
+        '如果暂时想不起来，可先选「仅本地使用」进入（云端数据不会被改动，下次用正确密码仍可恢复）。</p>' +
+        '<label>同步密码<input type="password" id="cpPass" placeholder="重新输入同步密码" autocomplete="off" /></label>' +
+        '<div class="modal-actions"><button class="btn primary" id="cpOk">重试</button>' +
+        '<button class="btn ghost" id="cpSkip">仅本地使用</button></div>';
+      $('cpOk').onclick = function () {
+        var v = $('cpPass').value.trim();
+        if (!v) { toast('请输入密码', 'err'); return; }
+        setPass(v); closeModal(); applyPass(v);
+      };
+      $('cpSkip').onclick = function () { setPass('__skip__'); closeModal(); applyPass(''); };
+      showModal();
+    }
+
     /* ---- 端到端加密（Web Crypto：PBKDF2 -> AES-GCM 256） ---- */
     function bufToB64(buf) {
       var bytes = new Uint8Array(buf), s = '';
@@ -182,7 +200,7 @@
           setStatus('密码错误', 'err');
           toast('同步密码错误，无法解密云端数据', 'err');
           pw = '';
-          askPass().then(applyPass);
+          showPassRetry();
         });
       }).catch(function (e) {
         if (first) { setStatus('已同步', 'ok'); return; }
@@ -4397,37 +4415,43 @@
 
   /* ============ 启动 ============ */
   function init() {
-    initDay();
-    finInit();
-    migrateWeight();
-    migrateMeal();
-    migrateReading();
-    migrateLife();
-    choreInit();
-    exInit();
-    // 默认日期填充
-    ['e-date'].forEach(function (id) { if ($(id)) $(id).value = TODAY; });
-    // 首次加载导航自动展开 2 秒
-    var sb = $('sidebar');
-    sb.style.width = '190px'; sb.style.flexBasis = '190px';
-    setTimeout(function () { sb.style.width = ''; sb.style.flexBasis = ''; }, 2000);
-
-    tickClock(); setInterval(tickClock, 1000);
-    bind();
-    renderAll();
-    setupDeadlineNotifications();
-    goPanel('overview');
-    closeModal();
-    CloudSync.start();
-
-    // 隐藏启动画面
+    // 启动画面：无论后续是否报错，1 秒后强制隐藏，避免卡在「正在加载…」
     var splash = $('splashScreen');
-    if (splash) {
-      setTimeout(function () {
+    var hideSplash = function () {
+      if (splash) {
         splash.classList.add('hidden');
-        /* 动画结束后移除 DOM */
         setTimeout(function () { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 550);
-      }, 800);
+      }
+    };
+    setTimeout(hideSplash, 1000);
+
+    try {
+      initDay();
+      finInit();
+      migrateWeight();
+      migrateMeal();
+      migrateReading();
+      migrateLife();
+      choreInit();
+      exInit();
+      // 默认日期填充
+      ['e-date'].forEach(function (id) { if ($(id)) $(id).value = TODAY; });
+      // 首次加载导航自动展开 2 秒
+      var sb = $('sidebar');
+      sb.style.width = '190px'; sb.style.flexBasis = '190px';
+      setTimeout(function () { sb.style.width = ''; sb.style.flexBasis = ''; }, 2000);
+
+      tickClock(); setInterval(tickClock, 1000);
+      bind();
+      renderAll();
+      setupDeadlineNotifications();
+      goPanel('overview');
+      closeModal();
+      CloudSync.start();
+    } catch (e) {
+      console.error('初始化出错（已尽量加载页面）：', e);
+      hideSplash();
+      toast('页面部分功能初始化失败，但你可以正常使用', 'err');
     }
   }
 
