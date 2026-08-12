@@ -4419,6 +4419,16 @@
     goPanel('overview');
     closeModal();
     CloudSync.start();
+
+    // 隐藏启动画面
+    var splash = $('splashScreen');
+    if (splash) {
+      setTimeout(function () {
+        splash.classList.add('hidden');
+        /* 动画结束后移除 DOM */
+        setTimeout(function () { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 550);
+      }, 800);
+    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

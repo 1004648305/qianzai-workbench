@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#4FA67E" />
+  <meta name="theme-color" content="#FAF6F0" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -15,9 +15,16 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- 启动画面（星星人加载动画） -->
+  <div class="splash-screen" id="splashScreen">
+    <img src="starman.png" alt="" class="splash-avatar" />
+    <div class="splash-text">倩崽工作台</div>
+    <div class="splash-sub">正在加载...</div>
+  </div>
+
   <!-- 侧边导航 -->
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo">✿</div>
+    <div class="sidebar-logo"><img src="starman.png" alt="倩崽工作台" class="brand-avatar" title="倩崽工作台" /></div>
     <div class="sidebar-title">倩崽工作台</div>
     <nav class="nav">
       <button class="nav-item active" data-nav="overview"><span class="nav-ico">📊</span><span class="nav-label">今日总览</span></button>
@@ -36,7 +43,7 @@
   <!-- 主内容区 -->
   <main class="content">
     <header class="topbar">
-      <h1 class="page-title" id="pageTitle">今日总览</h1>
+      <h1 class="page-title" id="pageTitle">今日总览<span class="star-deco twinkle">✦</span></h1>
       <div class="cloud-pill" id="cloudPill" title="点击：立即同步 / 设置云端同步">本地模式</div>
       <div class="clock" id="clock">—</div>
     </header>

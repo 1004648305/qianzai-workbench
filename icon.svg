@@ -1,19 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#EADCCB"/>
-      <stop offset="1" stop-color="#C9A98F"/>
+      <stop offset="0" stop-color="#FFF3D6"/>
+      <stop offset="1" stop-color="#F5D98E"/>
     </linearGradient>
+    <radialGradient id="face" cx="45%" cy="40%" r="55%">
+      <stop offset="0" stop-color="#FFE066"/>
+      <stop offset="1" stop-color="#F5C842"/>
+    </radialGradient>
   </defs>
-  <rect width="512" height="512" fill="url(#bg)"/>
-  <g transform="translate(256 256)">
-    <g fill="#FFFFFF">
-      <ellipse cx="0" cy="-116" rx="46" ry="76"/>
-      <ellipse cx="0" cy="-116" rx="46" ry="76" transform="rotate(72)"/>
-      <ellipse cx="0" cy="-116" rx="46" ry="76" transform="rotate(144)"/>
-      <ellipse cx="0" cy="-116" rx="46" ry="76" transform="rotate(216)"/>
-      <ellipse cx="0" cy="-116" rx="46" ry="76" transform="rotate(288)"/>
-    </g>
-    <circle r="56" fill="#B98C3E"/>
+  <!-- 圆形背景 -->
+  <circle cx="256" cy="256" r="248" fill="url(#bg)" stroke="#E8DDD6" stroke-width="4"/>
+  <!-- 星星人脸部（简笔风格） -->
+  <g transform="translate(256,260)">
+    <!-- 脸部轮廓 -->
+    <ellipse cx="0" cy="-10" rx="140" ry="150" fill="url(#face)"/>
+    <!-- 左眼（星星眼） -->
+    <ellipse cx="-50" cy="-20" rx="32" ry="38" fill="#fff"/>
+    <ellipse cx="-48" cy="-16" rx="18" ry="22" fill="#3D3D3D"/>
+    <text x="-56" y="-6" font-size="18" fill="#fff">★</text>
+    <!-- 右眼（星星眼） -->
+    <ellipse cx="50" cy="-20" rx="32" ry="38" fill="#fff"/>
+    <ellipse cx="52" cy="-16" rx="18" ry="22" fill="#3D3D3D"/>
+    <text x="44" y="-6" font-size="18" fill="#fff">★</text>
+    <!-- 腮红 -->
+    <ellipse cx="-85" cy="30" rx="26" ry="18" fill="#FFAA66" opacity=".5"/>
+    <ellipse cx="85" cy="30" rx="26" ry="18" fill="#FFAA66" opacity=".5"/>
+    <!-- 微笑 -->
+    <path d="M-25,45 Q0,70 25,45" fill="none" stroke="#B89A88" stroke-width="4" stroke-linecap="round"/>
+    <!-- 眉毛（俏皮） -->
+    <path d="M-78,-60 Q-50,-75 -28,-58" fill="none" stroke="#C49A40" stroke-width="4" stroke-linecap="round"/>
+    <path d="M78,-60 Q50,-75 28,-58" fill="none" stroke="#C49A40" stroke-width="4" stroke-linecap="round"/>
   </g>
 </svg>
