@@ -4473,6 +4473,7 @@
     };
     setTimeout(hideSplash, 1000);
 
+    // ---- 核心初始化（必须成功）----
     try {
       initDay();
       finInit();
@@ -4495,11 +4496,18 @@
       setupDeadlineNotifications();
       goPanel('overview');
       closeModal();
+    } catch (e) {
+      console.error('核心初始化出错：', e);
+      hideSplash();
+      // 只在真正严重时提示（如 renderAll 崩溃导致页面空白）
+      toast('页面部分功能初始化失败，但你可以正常使用', 'err');
+    }
+
+    // ---- 云端同步（独立，不阻塞页面）----
+    try {
       CloudSync.start();
     } catch (e) {
-      console.error('初始化出错（已尽量加载页面）：', e);
-      hideSplash();
-      toast('页面部分功能初始化失败，但你可以正常使用', 'err');
+      console.warn('云端同步启动跳过（不影响本地使用）：', e);
     }
   }
 
