@@ -4370,7 +4370,7 @@
 
     detailEl.innerHTML =
       '<div class="dn-detail-head">' +
-        '<div class="dn-detail-date">' + (+dParts[1]) + '月' + (+dParts[2]) + '日 ' + getWeekDayName(new Date(dateStr)) +
+        '<div class="dn-detail-date">📋 ' + (+dParts[1]) + '月' + (+dParts[2]) + '日 ' + getWeekDayName(new Date(dateStr)) +
           ' <small style="color:var(--muted);font-weight:400;font-size:12px">农历' + lunarD.month + lunarD.day + '</small></div>' +
         '<div class="dn-detail-actions">' +
           '<button class="btn primary sm" data-act="dn-add" data-dn-date="' + dateStr + '">+ 添加</button>' +
@@ -4442,7 +4442,7 @@
         text: text,
         createdAt: Date.now()
       });
-      toast('已记录 ✨', 'ok');
+      toast('已记录 ✨ 下滑查看', 'ok');
     }
 
     saveState();
@@ -4450,6 +4450,16 @@
     dnEditingId = null;
     dnSelDate = dateStr;
     renderDaily();
+    // 保存后自动滚动到详情区
+    setTimeout(function () {
+      var detailEl = $('dnDetail');
+      if (detailEl && !detailEl.hidden) {
+        detailEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // 高亮闪烁提示
+        detailEl.classList.add('dn-detail-flash');
+        setTimeout(function () { detailEl.classList.remove('dn-detail-flash'); }, 1200);
+      }
+    }, 300);
   }
 
   // 删除

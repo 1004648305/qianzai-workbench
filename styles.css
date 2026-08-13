@@ -1341,6 +1341,12 @@ body{
 
 /* 详情/编辑区 */
 .dn-detail{ margin-top:14px; }
+.dn-detail-flash{ animation:dnFlash 1.2s ease-out; }
+@keyframes dnFlash{
+  0%{ box-shadow:0 0 0 0 rgba(245,217,142,0.6); border-color:var(--star-yellow); }
+  70%{ box-shadow:0 0 0 8px rgba(245,217,142,0); border-color:var(--star-yellow); }
+  100%{ box-shadow:none; border-color:var(--border); }
+}
 .dn-detail-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
 .dn-detail-date{ font-size:17px; font-weight:700; color:var(--primary-deep); }
 .dn-detail-actions{ display:flex; gap:6px; }
