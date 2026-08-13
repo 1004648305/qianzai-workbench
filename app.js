@@ -13,7 +13,7 @@
     reading: [], notes: [], exercise: [], meal: [], weight: [], finance: [],
     plan: [], todo: [], life: [], travel: [],
     choreMembers: [ { id: 'a', name: '倩崽', color: '#4FA67E' }, { id: 'b', name: '胖崽', color: '#7FB1C9' } ],
-    choreDone: {}, dailyNotes: [],
+    choreDone: {},
     lifeLists: [], lifeItems: [], lifeGroups: [], lifeTemplates: [],
     accounts: [], budgets: [], finCats: [],
     weightTarget: JSON.parse(JSON.stringify(WEIGHT_TARGET_DEFAULT)),
@@ -492,7 +492,7 @@
   var TITLES = {
     overview: '今日总览', reading: '每月阅读', exercise: '锻炼身体', meal: '好好吃饭',
     weight: '体重管理', finance: '理财管理', todo: '待办计划',
-    travel: '旅游记录', chores: '家务排班', dailynotes: '每日小事'
+    travel: '旅游记录', chores: '家务排班'
   };
   function goPanel(name) {
     var items = document.querySelectorAll('.nav-item');
@@ -3825,19 +3825,6 @@
       if (act === 'ex-all') { exSelDate = null; renderExerciseCalendar(); return; }
       if (act === 'chore-toggle') { toggleChore(btn.getAttribute('data-cdate'), btn.getAttribute('data-ckey')); return; }
       if (act === 'chore-set') { openChoreMemberModal(); return; }
-      // 每日小事
-      if (act === 'dn-cell-click') { dnSelDate = btn.getAttribute('data-dn-date'); renderDaily(); return; }
-      if (act === 'dn-add') { openDnModal(btn.getAttribute('data-dn-date')); return; }
-      if (act === 'dn-edit') { openDnModal(null, btn.getAttribute('data-dn-id')); return; }
-      if (act === 'dn-del') { deleteDnNote(btn.getAttribute('data-dn-id')); return; }
-      if (act === 'dn-prev') {
-        if (dnMonth === 0) { dnMonth = 11; dnYear--; } else dnMonth--;
-        dnSelDate = null; renderDaily(); return;
-      }
-      if (act === 'dn-next') {
-        if (dnMonth === 11) { dnMonth = 0; dnYear++; } else dnMonth++;
-        dnSelDate = null; renderDaily(); return;
-      }
       var mod = btn.getAttribute('data-mod');
       var idEl = btn.closest('[data-id]'); var id = idEl ? idEl.getAttribute('data-id') : null;
       if (mod === 'book') {
@@ -3978,16 +3965,11 @@
       var b = e.target.closest('[data-range]'); if (!b) return;
       exRange = b.getAttribute('data-range'); setSegActive($('exRangeSeg'), b); renderExerciseStats();
     });
-
-    // ===== 每日小事模块 =====
-    var dnFab = $('dnFab');
-    if (dnFab) dnFab.addEventListener('click', function () { openDnModal(dnSelDate || TODAY); });
   }
 
   function renderAll() {
     renderReading(); renderExercise(); renderMeal(); renderWeight(); renderFinance();
     renderTodo(); renderTravel(); renderChores(); renderOverview();
-    renderDaily();
   }
 
   /* ============ 家务排班（沿用家庭管家排班引擎，成员可配置） ============ */
@@ -4173,302 +4155,6 @@
       });
       saveState();
     }
-  }
-
-  /* ============ 每日小事（月历日记） ============ */
-  var dnYear, dnMonth;          // 当前显示的年/月
-  var dnSelDate = null;         // 选中的日期字符串 YYYY-MM-DD，null=今天
-  var dnEditingId = null;       // 正在编辑的记录 id
-
-  // 简易农历数据（2024-2030 常用节气 + 农历月份名）
-  var SOLAR_TERMS = {
-    '0105':'小寒','0120':'大寒','0204':'立春','0218':'雨水',
-    '0305':'惊蛰','0320':'春分','0404':'清明','0419':'谷雨',
-    '0505':'立夏','0521':'小满','0605':'芒种','0621':'夏至',
-    '0706':'小暑','0722':'大暑','0807':'立秋','0822':'处暑',
-    '0907':'白露','0922':'秋分','1008':'寒露','1023':'霜降',
-    '1107':'立冬','1121':'小雪','1206':'大雪','1221':'冬至'
-  };
-  var LUNAR_MONTHS = ['正月','二月','三月','四月','五月','六月','七月','八月','九月','十月','冬月','腊月'];
-  var LUNAR_DAYS = ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十',
-    '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
-    '廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
-  // ====== 正确的农历转换算法（基于标准 LunarInfo 数据表，已验证）======
-  function solarToLunar(y, m, d) {
-    var LunarInfo = [
-      0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,
-      0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,
-      0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,
-      0x06566,0x0d4a0,0x0ea50,0x16a95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,
-      0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,
-      0x06ca0,0x0b550,0x15355,0x04da0,0x0a5b0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0,
-      0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,
-      0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,
-      0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,
-      0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x05ac0,0x0ab60,0x096d5,0x092e0,
-      0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,
-      0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,
-      0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,
-      0x05aa0,0x076a3,0x096d0,0x04afb,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,
-      0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0
-    ];
-    function lYearDays(y) { var i, sum = 348; for (i = 0x8000; i > 0x8; i >>= 1) sum += (LunarInfo[y - 1900] & i) ? 1 : 0; return sum + leapDays(y); }
-    function leapMonth(y) { return LunarInfo[y - 1900] & 0xf; }
-    function leapDays(y) { if (leapMonth(y)) return (LunarInfo[y - 1900] & 0x10000) ? 30 : 29; return 0; }
-    function monthDays(y, m) { return (LunarInfo[y - 1900] & (0x10000 >> m)) ? 30 : 29; }
-
-    // 基准：1900年1月31日 = 农历正月初一（用 UTC 避免时区问题）
-    var objDate = new Date(y, m - 1, d);
-    var offset = (Date.UTC(objDate.getFullYear(), objDate.getMonth(), objDate.getDate()) - Date.UTC(1900, 0, 31)) / 86400000;
-
-    var i, temp = 0, ly = 1900;
-    // 第一步：定位农历年
-    for (i = 1900; i < 2101 && offset > 0; i++) {
-      temp = lYearDays(i);
-      offset -= temp;
-    }
-    if (offset < 0) { offset += temp; i--; }
-    ly = i;
-
-    // 第二步：定位农历月（含闰月处理）
-    var leap = leapMonth(ly), isLeap = false, lm = 1;
-    for (i = 1; i < 13 && offset > 0; i++) {
-      if (leap > 0 && i === (leap + 1) && !isLeap) { --i; isLeap = true; temp = leapDays(ly); }
-      else { temp = monthDays(ly, i); }
-      if (isLeap === true && i === (leap + 1)) isLeap = false;
-      offset -= temp;
-    }
-    // 边界修正
-    if (offset === 0 && leap > 0 && i === leap + 1) {
-      if (isLeap) isLeap = false; else { isLeap = true; --i; }
-    }
-    if (offset < 0) { offset += temp; --i; }
-
-    lm = i;
-    var ld = offset + 1;
-
-    var monthName = LUNAR_MONTHS[(lm - 1) % 12];
-    if (isLeap) monthName = '闰' + monthName;
-    return { month: monthName, day: LUNAR_DAYS[Math.min(ld - 1, 29)] };
-  }
-  function getSolarTerm(y, m, d) {
-    var key = pad(m) + pad(d);
-    return SOLAR_TERMS[key] || '';
-  }
-  function getWeekDayName(d) { return ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()]; }
-
-  function getDailyNotes(dateStr) {
-    return (state.dailyNotes || []).filter(function (n) { return n.date === dateStr; });
-  }
-
-  function renderDaily() {
-    var headerEl = $('dnHeader');
-    var gridEl = $('dnCalGrid');
-    var wdEl = $('dnWeekdays');
-    if (!headerEl || !gridEl) return;
-
-    var now = new Date();
-    if (dnYear == null) dnYear = now.getFullYear();
-    if (dnMonth == null) dnMonth = now.getMonth();
-
-    var y = dnYear, m = dnMonth;
-    var firstDay = new Date(y, m, 1);
-    var lastDay = new Date(y, m + 1, 0);
-    var startDow = (firstDay.getDay() + 6) % 7; // 周一=0 ... 周日=6
-    var daysInMonth = lastDay.getDate();
-
-    // ---- 头部：年月 + 节气 + 农历信息 ----
-    var todayStr = fmtDate(now);
-    var solarTerm = getSolarTerm(y, m, now.getDate());
-    var lunar = solarToLunar(y, m, now.getDate());
-
-    headerEl.innerHTML =
-      '<div class="dn-cal-nav"><button data-act="dn-prev" title="上个月">◀</button></div>' +
-      '<div class="dn-header-left">' +
-        '<div class="dn-year-month"><span class="dn-y">' + y + '</span>年<span style="margin:0 3px"></span>' + (m + 1) + '<span style="font-size:20px;margin-left:4px">月</span></div>' +
-        (solarTerm ? '<div class="dn-solar-info"><span class="dn-solar-term">' + solarTerm + '</span><span>' + fmtDate(now).substring(5) + '</span><span>' + getWeekDayName(now) + '</span></div>' : '') +
-        '<div class="dn-lunar-info">农历 ' + lunar.month + lunar.day + '</div>' +
-      '</div>' +
-      '<div class="dn-header-right"><div class="dn-mascot">📝</div></div>' +
-      '<div class="dn-cal-nav"><button data-act="dn-next" title="下个月">▶</button></div>';
-
-    // ---- 星期标题行 ----
-    var wds = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-    var wdNames = ['一', '二', '三', '四', '五', '六', '日'];
-    wdEl.innerHTML = wds.map(function (_, i) {
-      var cls = 'dn-cal-wd' + (i >= 5 ? ' weekend' : '');
-      return '<div class="' + cls + '">' + wdNames[i] + '</div>';
-    }).join('');
-
-    // ---- 日历格子 ----
-    var html = '';
-    var prevMonthLast = new Date(y, m, 0).getDate();
-
-    // 上月尾部
-    for (var i = 0; i < startDow; i++) {
-      var pd = prevMonthLast - startDow + 1 + i;
-      html += '<div class="dn-cell empty other-month"><span class="dn-day-num">' + pd + '</span></div>';
-    }
-    // 本月日期
-    for (var d = 1; d <= daysInMonth; d++) {
-      var ds = y + '-' + pad(m + 1) + '-' + pad(d);
-      var isToday = ds === todayStr;
-      var isSel = ds === dnSelDate;
-      var dow = (startDow + d - 1) % 7;
-      var isWeekend = dow >= 5;
-      var notes = getDailyNotes(ds);
-      var hasNote = notes.length > 0;
-
-      var cls = 'dn-cell';
-      if (isToday) cls += ' today';
-      if (isSel) cls += ' selected';
-      if (isWeekend) cls += ' weekend';
-      if (hasNote) cls += ' dn-has-dot';
-
-      var lunarD = solarToLunar(y, m, d);
-      html += '<div class="' + cls + '" data-dn-date="' + ds + '" data-act="dn-cell-click">' +
-        '<span class="dn-day-num">' + d + '</span>' +
-        '<span class="dn-day-lunar">' + lunarD.day + '</span>';
-
-      // 预览文字（最多2条）
-      if (hasNote) {
-        html += '<div class="dn-preview">';
-        for (var pi = 0; pi < Math.min(notes.length, 2); pi++) {
-          var text = notes[pi].text || '';
-          text = text.replace(/\n/g, ' ').trim();
-          if (text.length > 14) text = text.substring(0, 13) + '…';
-          html += '<div class="dn-preview-line">' + escHtml(text) + '</div>';
-        }
-        if (notes.length > 2) html += '<div class="dn-preview-line" style="color:var(--muted)">+' + (notes.length - 2) + '</div>';
-        html += '</div>';
-      }
-
-      html += '</div>';
-    }
-    // 下月头部
-    var totalCells = startDow + daysInMonth;
-    var remaining = totalCells % 7 === 0 ? 0 : 7 - totalCells % 7;
-    for (var j = 1; j <= remaining; j++) {
-      html += '<div class="dn-cell empty other-month"><span class="dn-day-num">' + j + '</span></div>';
-    }
-    gridEl.innerHTML = html;
-
-    // 如果有选中日期，渲染详情
-    if (dnSelDate) renderDnDetail(dnSelDate);
-    else $('dnDetail').hidden = true;
-  }
-
-  // 渲染选中日期的详情列表
-  function renderDnDetail(dateStr) {
-    var detailEl = $('dnDetail');
-    if (!detailEl) return;
-    var notes = getDailyNotes(dateStr);
-
-    detailEl.hidden = false;
-    var dParts = dateStr.split('-');
-    var lunarD = solarToLunar(+dParts[0], +dParts[1] - 1, +dParts[2]);
-
-    detailEl.innerHTML =
-      '<div class="dn-detail-head">' +
-        '<div class="dn-detail-date">📋 ' + (+dParts[1]) + '月' + (+dParts[2]) + '日 ' + getWeekDayName(new Date(dateStr)) +
-          ' <small style="color:var(--muted);font-weight:400;font-size:12px">农历' + lunarD.month + lunarD.day + '</small></div>' +
-        '<div class="dn-detail-actions">' +
-          '<button class="btn primary sm" data-act="dn-add" data-dn-date="' + dateStr + '">+ 添加</button>' +
-        '</div>' +
-      '</div>';
-
-    if (notes.length === 0) {
-      detailEl.innerHTML += '<div class="dn-empty"><div class="dn-empty-icon">📭</div>这天还没有记录，点击上方按钮添加吧～</div>';
-      return;
-    }
-
-    detailEl.innerHTML += '<div class="dn-detail-list">';
-    notes.forEach(function (note) {
-      detailEl.innerHTML +=
-        '<div class="dn-item" data-id="' + note.id + '">' +
-          '<div class="dn-item-text">' + escHtml(note.text) + '</div>' +
-          '<div class="dn-item-ops">' +
-            '<button class="icon-btn" data-act="dn-edit" data-dn-id="' + note.id + '" title="编辑">✏️</button>' +
-            '<button class="icon-btn" data-act="dn-del" data-dn-id="' + note.id + '" title="删除">🗑️</button>' +
-          '</div>' +
-        '</div>';
-    });
-    detailEl.innerHTML += '</div>';
-  }
-
-  // 打开添加/编辑弹窗
-  function openDnModal(dateStr, editId) {
-    var note = null;
-    if (editId) {
-      note = (state.dailyNotes || []).find(function (n) { return n.id === editId; });
-      if (!note) { toast('记录不存在', 'err'); return; }
-    }
-    dnEditingId = editId || null;
-    var targetDate = dateStr || (note && note.date) || TODAY;
-
-    $('modalTitle').textContent = editId ? '编辑每日小事' : '记录今日小事';
-    $('modalBody').innerHTML =
-      '<div style="margin-bottom:10px;font-size:13px;color:var(--muted)">📅 ' + targetDate + ' ' + getWeekDayName(new Date(targetDate)) + '</div>' +
-      '<label>记录内容<textarea id="dnText" placeholder="今天发生了什么有趣的事？随便写点什么…"' + (note ? '>' : '>') + (note ? note.text : '') + '</textarea></label>' +
-      '<div class="dn-form-hint">支持多行，每一条小事可以换行分开记录</div>' +
-      '<div class="modal-actions">' +
-        '<button class="btn primary" id="dnSubmit">保存</button>' +
-        '<button class="btn ghost" id="dnCancel">取消</button>' +
-      '</div>';
-
-    $('dnSubmit').addEventListener('click', function () { saveDnNote(targetDate); });
-    $('dnCancel').addEventListener('click', function () { closeModal(); dnEditingId = null; });
-
-    showModal();
-    setTimeout(function () { var ta = $('dnText'); if (ta) ta.focus(); }, 150);
-  }
-
-  // 保存
-  function saveDnNote(dateStr) {
-    var text = ($('dnText').value || '').trim();
-    if (!text) { toast('请输入内容', 'err'); return; }
-
-    if (!state.dailyNotes) state.dailyNotes = [];
-
-    if (dnEditingId) {
-      // 编辑
-      var note = state.dailyNotes.find(function (n) { return n.id === dnEditingId; });
-      if (note) { note.text = text; note.updatedAt = Date.now(); toast('已更新', 'ok'); }
-    } else {
-      // 新增
-      state.dailyNotes.push({
-        id: 'dn_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-        date: dateStr,
-        text: text,
-        createdAt: Date.now()
-      });
-      toast('已记录 ✨ 下滑查看', 'ok');
-    }
-
-    saveState();
-    closeModal();
-    dnEditingId = null;
-    dnSelDate = dateStr;
-    renderDaily();
-    // 保存后自动滚动到详情区
-    setTimeout(function () {
-      var detailEl = $('dnDetail');
-      if (detailEl && !detailEl.hidden) {
-        detailEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        // 高亮闪烁提示
-        detailEl.classList.add('dn-detail-flash');
-        setTimeout(function () { detailEl.classList.remove('dn-detail-flash'); }, 1200);
-      }
-    }, 300);
-  }
-
-  // 删除
-  function deleteDnNote(id) {
-    if (!confirmDel('确定要删除这条记录吗？')) return;
-    state.dailyNotes = (state.dailyNotes || []).filter(function (n) { return n.id !== id; });
-    saveState();
-    toast('已删除');
-    renderDaily();
   }
 
   /* ============ 启动 ============ */
