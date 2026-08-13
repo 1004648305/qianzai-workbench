@@ -58,6 +58,10 @@
     var ROW_ID = 'qianzai_workbench_v1';
     var PASS_KEY = 'qianzai_cloud_pass';
     var client = null, ready = false, suppress = false, pushTimer = null, statusEl = null, pw = '';
+    var syncFailCount = 0;            // 连续失败次数
+    var MAX_RETRIES = 3;              // 最大重试次数
+    var RETRY_DELAYS = [2000, 5000, 10000]; // 重试间隔(ms)
+    var retryTimer = null;            // 重试定时器
 
     function enabled() {
       return typeof window.supabase !== 'undefined'
@@ -170,7 +174,9 @@
 
     function applyPass(pv) {
       if (!pv) { setStatus('本地模式', 'off'); return Promise.resolve(); }
-      pw = pv; ready = true; setStatus('已同步', 'ok');
+      pw = pv; ready = true;
+      setStatus('连接中…', 'busy');
+      syncFailCount = 0;
       return pull(true);
     }
 
@@ -178,11 +184,13 @@
       if (!ready) return Promise.resolve();
       return client.from(TABLE).select('*').eq('id', ROW_ID).maybeSingle().then(function (res) {
         if (res.error) {
-          if (first) { setStatus('已同步', 'ok'); return; }
-          console.warn('pull 失败', res.error); setStatus('同步失败', 'err'); return;
+          console.warn('pull 失败', res.error);
+          if (first) { handleSyncFail('连接云端失败，将自动重试…'); }
+          else { setStatus('同步失败', 'err'); scheduleRetry(); }
+          return;
         }
         var row = res.data;
-        if (!row || !row.data) { setStatus('已同步', 'ok'); return; }
+        if (!row || !row.data) { setStatus('已同步', 'ok'); syncFailCount = 0; return; }
         return decryptState(row, pw).then(function (s) {
           var cloudTs = row.updated_at || 0, localTs = state.__syncTs || 0;
           if (first || cloudTs > localTs) {
@@ -196,40 +204,80 @@
             if (!first) toast('已从其他设备同步最新数据', 'ok');
           }
           setStatus('已同步', 'ok');
+          syncFailCount = 0;
         }).catch(function () {
           setStatus('密码错误', 'err');
           toast('同步密码错误，无法解密云端数据', 'err');
-          pw = '';
+          pw = ''; ready = false;
           showPassRetry();
         });
       }).catch(function (e) {
-        if (first) { setStatus('已同步', 'ok'); return; }
-        console.warn('pull 失败', e); setStatus('同步失败', 'err');
+        console.warn('pull 网络异常', e);
+        if (first) { handleSyncFail('网络不稳定，将自动重试…'); }
+        else { setStatus('同步失败', 'err'); scheduleRetry(); }
       });
+    }
+
+    // 统一处理同步失败：显示状态 + 自动重试
+    function handleSyncFail(msg) {
+      syncFailCount++;
+      if (syncFailCount <= MAX_RETRIES) {
+        setStatus('重试中(' + syncFailCount + '/' + MAX_RETRIES + ')', 'warn');
+        if (msg) toast(msg, 'warn');
+        scheduleRetry();
+      } else {
+        setStatus('同步失败', 'err');
+        toast('同步多次失败，请检查网络后点击重试', 'err');
+      }
+    }
+
+    // 安排自动重试
+    function scheduleRetry() {
+      if (retryTimer) clearTimeout(retryTimer);
+      var delay = RETRY_DELAYS[Math.min(syncFailCount - 1, RETRY_DELAYS.length - 1)];
+      retryTimer = setTimeout(function () {
+        if (!ready) return;
+        console.log('自动重试同步 第' + syncFailCount + '次');
+        setStatus('同步中…', 'busy');
+        pull(false).then(function () { if (ready) push(); });
+      }, delay);
     }
 
     function schedulePush() {
       if (!enabled() || !ready || suppress) return;
-      setStatus('同步中…', 'busy');
       if (pushTimer) clearTimeout(pushTimer);
       pushTimer = setTimeout(function () { push(); }, 800);
     }
 
     function push() {
       if (!ready) return Promise.resolve();
+      setStatus('同步中…', 'busy');
       state.__syncTs = Date.now();
       return encryptState(state, pw).then(function (enc) {
         return client.from(TABLE).upsert({ id: ROW_ID, data: JSON.stringify(enc), updated_at: state.__syncTs });
       }).then(function (res) {
-        if (res.error) { console.warn('push 失败', res.error); setStatus('同步失败', 'err'); return; }
+        if (res.error) {
+          console.warn('push 失败', res.error);
+          handleSyncFail('上传失败，将自动重试…');
+          return;
+        }
         setStatus('已同步', 'ok');
-      }).catch(function (e) { console.warn('push 失败', e); setStatus('同步失败', 'err'); });
+        syncFailCount = 0;
+        if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+      }).catch(function (e) {
+        console.warn('push 网络异常', e);
+        handleSyncFail('上传失败，将自动重试…');
+      });
     }
 
     function syncNow() {
       if (!enabled()) { setStatus('本地模式', 'off'); return; }
       if (!ready) { start(); return; }
-      pull(false).then(push);
+      // 用户主动点重试，重置失败计数
+      if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+      syncFailCount = 0;
+      setStatus('同步中…', 'busy');
+      pull(false).then(function () { if (ready) push(); });
     }
 
     function enableFromPill() {
