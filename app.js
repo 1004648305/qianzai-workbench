@@ -3802,7 +3802,7 @@
             '<span>' + zodiac.short + '</span>' +
           '</div>' +
         '</div>' +
-        '<img class="ov-date-avatar" src="starman.png" alt="" />';
+        '<img class="ov-date-avatar" src="starman.png?v=20260814" alt="" />';
     } catch (e) {
       console.warn('日期头卡片渲染跳过:', e);
       $('ovDateHeader').innerHTML = '<div class="ov-date-info"><div class="ov-date-main">' +
