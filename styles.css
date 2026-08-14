@@ -231,6 +231,54 @@ body{
   width:4px; height:24px; border-radius:2px;
   background:linear-gradient(180deg,var(--star-yellow),var(--primary));
 }
+/* ===== 今日总览 · 日期头卡片 ===== */
+.ov-date-header{
+  background:linear-gradient(135deg, var(--star-yellow-light) 0%, #FFF0E0 30%, var(--accent) 70%, var(--primary) 100%);
+  border:1px solid rgba(212,184,168,0.35);
+  border-radius:var(--radius-card);
+  padding:22px 26px;
+  margin-bottom:16px;
+  display:flex; align-items:center; justify-content:space-between;
+  box-shadow:0 6px 24px rgba(212,184,168,0.18), 0 2px 6px rgba(212,184,168,0.08);
+  position:relative; overflow:hidden;
+}
+.ov-date-header::before{
+  content:''; position:absolute; right:-20px; top:-30px;
+  width:120px; height:120px; border-radius:50%;
+  background:rgba(255,255,255,0.35); pointer-events:none;
+}
+.ov-date-header::after{
+  content:''; position:absolute; left:40%; bottom:-15px;
+  width:80px; height:80px; border-radius:50%;
+  background:rgba(245,217,142,0.25); pointer-events:none;
+}
+.ov-date-info{ position:relative; z-index:1; }
+.ov-date-main{
+  font-size:24px; font-weight:700; color:var(--text);
+  letter-spacing:1.5px; line-height:1.3;
+}
+.ov-date-sub{
+  margin-top:6px; font-size:13px; color:var(--muted);
+  display:flex; gap:14px; flex-wrap:wrap;
+}
+.ov-date-sub span{ opacity:.88; }
+.ov-date-avatar{
+  width:72px; height:72px; border-radius:50%;
+  object-fit:cover;
+  border:3px solid rgba(255,255,255,0.7);
+  box-shadow:0 4px 14px rgba(180,150,130,0.25), 0 0 0 4px rgba(245,217,142,0.2);
+  position:relative; z-index:1;
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.ov-date-avatar:hover{ transform:rotate(8deg) scale(1.06); box-shadow:0 6px 20px rgba(180,150,130,0.35), 0 0 0 5px rgba(245,217,142,0.3); }
+
+@media(max-width:680px){
+  .ov-date-header{ padding:16px 18px; }
+  .ov-date-main{ font-size:19px; letter-spacing:1px; }
+  .ov-date-sub{ font-size:12px; gap:10px; }
+  .ov-date-avatar{ width:56px; height:56px; }
+}
+
 .ov-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; margin-bottom:16px; }
 .ov-cell{
   background:var(--card-grad); border:1px solid var(--border); border-radius:var(--radius-card);
