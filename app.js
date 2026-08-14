@@ -494,6 +494,19 @@
     weight: '体重管理', finance: '理财管理', todo: '待办计划',
     travel: '旅游记录', chores: '家务排班'
   };
+  // 每个模块对应的星星人造型图
+  var MODULE_STARMAN = {
+    overview: 'starman.png',
+    reading:  'star-read.png',
+    exercise: 'star-exercise.png',
+    meal:     'star-meal.png',
+    weight:   'star-weight.png',
+    finance:  'star-finance.png',
+    todo:     'star-todo.png',
+    travel:   'star-travel.png',
+    chores:   'star-chores.png'
+  };
+
   function goPanel(name) {
     var items = document.querySelectorAll('.nav-item');
     for (var i = 0; i < items.length; i++) items[i].classList.toggle('active', items[i].getAttribute('data-nav') === name);
@@ -505,7 +518,10 @@
         panels[j].style.animation = 'none'; void panels[j].offsetWidth; panels[j].style.animation = '';
       }
     }
-    $('pageTitle').textContent = TITLES[name] || '';
+    $('pageTitleText').textContent = TITLES[name] || '';
+    // 切换星星人造型
+    var sm = $('moduleStarman');
+    if (sm) sm.src = (MODULE_STARMAN[name] || 'starman.png') + '?v=20260814';
     if (name === 'overview') renderOverview();
     if (name === 'finance') renderFinance();
   }
