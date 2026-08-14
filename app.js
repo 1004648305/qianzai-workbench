@@ -3752,7 +3752,7 @@
   function solarToLunar(y,m,d){
     var base=new Date(1900,0,31); var obj=new Date(y,m-1,d);
     var offset=Math.floor((obj.getTime()-base.getTime())/86400000);
-    var ly=1900,lm,ld,temp;
+    var ly=1900,lm,ld,temp,leapFlag=false;
     for(;ly<2101&&offset>0;){ temp=lunarYearDays(ly); offset-=temp; ly++; }
     if(offset<0){ offset+=temp; ly--; }
     lm=1;
@@ -3787,21 +3787,28 @@
 
   /* ============ 总览 ============ */
   function renderOverview() {
-    // ===== 日期头卡片 =====
-    var now = new Date();
-    var y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
-    var lunar = solarToLunar(y, m, d);
-    var zodiac = getZodiacYear(lunar.year);
-    var wday = getWeekDayName(now);
-    $('ovDateHeader').innerHTML =
-      '<div class="ov-date-info">' +
-        '<div class="ov-date-main">' + y + '年' + pad(m) + '月' + pad(d) + '日 · ' + wday + '</div>' +
-        '<div class="ov-date-sub">' +
-          '<span>农历 ' + lunar.month + lunar.day + '</span>' +
-          '<span>' + zodiac.short + '</span>' +
+    // ===== 日期头卡片（独立保护，农历出错不影响其他模块） =====
+    try {
+      var now = new Date();
+      var y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
+      var lunar = solarToLunar(y, m, d);
+      var zodiac = getZodiacYear(lunar.year);
+      var wday = getWeekDayName(now);
+      $('ovDateHeader').innerHTML =
+        '<div class="ov-date-info">' +
+          '<div class="ov-date-main">' + y + '年' + pad(m) + '月' + pad(d) + '日 · ' + wday + '</div>' +
+          '<div class="ov-date-sub">' +
+            '<span>农历 ' + lunar.month + lunar.day + '</span>' +
+            '<span>' + zodiac.short + '</span>' +
+          '</div>' +
         '</div>' +
-      '</div>' +
-      '<img class="ov-date-avatar" src="starman.png" alt="" />';
+        '<img class="ov-date-avatar" src="starman.png" alt="" />';
+    } catch (e) {
+      console.warn('日期头卡片渲染跳过:', e);
+      $('ovDateHeader').innerHTML = '<div class="ov-date-info"><div class="ov-date-main">' +
+        new Date().getFullYear() + '年' + pad(new Date().getMonth()+1) + '月' + pad(new Date().getDate()) + '日 · ' +
+        getWeekDayName(new Date()) + '</div></div>';
+    }
 
     var h = new Date().getHours();
     var greet = h < 11 ? '早上好 🌤️' : h < 18 ? '下午好 ☀️' : '晚上好 🌙';
