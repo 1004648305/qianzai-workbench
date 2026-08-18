@@ -441,7 +441,7 @@ body{
 .reminder-banner .rem-hint{ font-size:11px; color:#B0A090; }
 
 /* ===== 待办待放 · 左右双栏布局 ===== */
-.todo-split-layout{ display:flex; gap:20px; align-items:stretch; }
+.todo-split-layout{ display:flex; gap:20px; align-items:flex-start; }
 .todo-col{ flex:1 1 0; min-width:0; display:flex; flex-direction:column; }
 .todo-col .col-title{
   font-size:15px; font-weight:700; color:var(--text);
