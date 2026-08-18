@@ -11,7 +11,7 @@
 
   var EMPTY = {
     reading: [], notes: [], exercise: [], meal: [], weight: [], finance: [],
-    plan: [], todo: [], life: [], travel: [],
+    plan: [], todo: [], pending: [], life: [], travel: [],
     choreMembers: [ { id: 'a', name: '倩崽', color: '#4FA67E' }, { id: 'b', name: '胖崽', color: '#7FB1C9' } ],
     choreDone: {},
     lifeLists: [], lifeItems: [], lifeGroups: [], lifeTemplates: [],
@@ -491,7 +491,7 @@
   /* ============ 导航 ============ */
   var TITLES = {
     overview: '今日总览', reading: '每月阅读', exercise: '锻炼身体', meal: '好好吃饭',
-    weight: '体重管理', finance: '理财管理', todo: '待办计划',
+    weight: '体重管理', finance: '理财管理', todo: '待办待放',
     travel: '旅游记录', chores: '家务排班'
   };
   // 每个模块对应的星星人造型图
@@ -542,7 +542,7 @@
   }
   function cancelEdit(mod) {
     editing[mod] = null;
-    var map = { reading: 'r', exercise: 'e', meal: 'm', weight: 'w', finance: 'f', plan: 'p', todo: 't', travel: 'tr' };
+    var map = { reading: 'r', exercise: 'e', meal: 'm', weight: 'w', finance: 'f', plan: 'p', todo: 't', pending: 'pf', travel: 'tr' };
     var p = map[mod];
     $(p + '-submit').textContent = '添加';
     $(p + '-cancel').hidden = true;
@@ -3087,6 +3087,69 @@
     saveState(); clearForm('todo'); renderTodo();
   }
 
+  /* ============ 模块7-右：待放计划 ============ */
+  function renderPending() {
+    var box = $('pendingList');
+    var list = state.pending || [];
+    if (!list.length) { box.innerHTML = emptyState('🗂️', '还没有待放计划'); return; }
+    box.innerHTML = list.map(function (p) {
+      var done = p.done;
+      var stCls = done ? 'green' : 'muted';
+      var head = '<span' + (done ? ' style="text-decoration:line-through;color:var(--muted)"' : '') + '>' + esc(p.content) + '</span>' +
+        '<span class="tag ' + stCls + '">' + (done ? '已完成' : '待放') + '</span>';
+      var line2 = '执行人：' + esc(p.assignee) + (p.note ? ' · ' + esc(p.note) : '');
+      return '<div class="item" data-id="' + p.id + '" data-mod="pending">' +
+        '<div class="body"><div class="line1">' + head + '</div><div class="line2">' + line2 + '</div></div>' +
+        '<div class="ops">' +
+        '<button class="icon-btn" data-act="toggle-pending" data-id="' + p.id + '" title="' + (done ? '标记未完成' : '标记完成') + '">' + (done ? '↩️' : '✅') + '</button>' +
+        '<button class="icon-btn" data-act="edit-pending" data-id="' + p.id + '" title="编辑">✏️</button>' +
+        '<button class="icon-btn" data-act="del-pending" data-id="' + p.id + '" title="删除">🗑️</button></div></div>';
+    }).join('');
+  }
+  function togglePending(id) {
+    var p = (state.pending || []).find(function (x) { return x.id === id; });
+    if (!p) return;
+    p.done = !p.done;
+    saveState(); renderPending();
+  }
+  function submitPending() {
+    var content = $('pf-content').value.trim();
+    var assignee = $('pf-assignee').value.trim();
+    if (!content) { toast('请填写待放事项', 'err'); return; }
+    if (!assignee) { toast('请填写执行人', 'err'); return; }
+    var rec = {
+      id: editing.pending || uid(),
+      content: content, assignee: assignee,
+      note: $('pf-note').value.trim(),
+      done: false
+    };
+    if (editing.pending) {
+      var i = (state.pending || []).findIndex(function (x) { return x.id === editing.pending; });
+      if (i >= 0) state.pending[i] = Object.assign(state.pending[i], rec, { id: editing.pending });
+      cancelEdit('pending');
+    } else {
+      if (!state.pending) state.pending = [];
+      state.pending.push(rec); flashOk($('pf-submit'));
+    }
+    saveState(); clearForm('pending'); renderPending();
+  }
+  function deletePending(id) {
+    if (!confirmDel('确定删除这条待放计划？')) return;
+    state.pending = (state.pending || []).filter(function (x) { return x.id !== id; });
+    saveState(); renderPending();
+  }
+  function startEditPending(id) {
+    var p = (state.pending || []).find(function (x) { return x.id === id; });
+    if (!p) return;
+    $('pf-content').value = p.content;
+    $('pf-assignee').value = p.assignee;
+    $('pf-note').value = p.note || '';
+    $('pfFormTitle').textContent = '编辑待放计划';
+    $('pf-submit').textContent = '保存';
+    $('pf-cancel').hidden = false;
+    editing.pending = id;
+  }
+
   /* ============ 待办提醒横幅 + 系统通知 ============ */
   var notifiedTodoIds = {};   // 本次会话已通知过的待办 id（避免重复弹窗）
 
@@ -3691,7 +3754,7 @@
   function emptyState(em, text) { return '<div class="empty"><span class="em">' + em + '</span>' + text + '</div>'; }
 
   function fillForm(mod, rec) {
-    var map = { exercise: 'e', meal: 'm', weight: 'w', finance: 'f', plan: 'p', todo: 't', travel: 'tr' };
+    var map = { exercise: 'e', meal: 'm', weight: 'w', finance: 'f', plan: 'p', todo: 't', pending: 'pf', travel: 'tr' };
     var p = map[mod];
     if (mod === 'exercise') {
       $('e-date').value = rec.date; $('e-type').value = rec.type; $('e-duration').value = rec.duration;
@@ -3704,19 +3767,23 @@
     } else if (mod === 'todo') {
       $('t-due').value = rec.dueDate; $('t-content').value = rec.content; $('t-project').value = rec.project || '';
       $('t-priority').value = rec.priority; $('t-status').value = rec.status;
+    } else if (mod === 'pending') {
+      $('pf-content').value = rec.content; $('pf-assignee').value = rec.assignee;
+      $('pf-note').value = rec.note || '';
     } else if (mod === 'travel') {
       $('tr-dest').value = rec.destination; $('tr-start').value = rec.startDate; $('tr-end').value = rec.endDate;
       $('tr-companion').value = rec.companion || ''; $('tr-cost').value = rec.cost || ''; $('tr-note').value = rec.note || '';
     }
   }
   function clearForm(mod) {
-    var map = { exercise: 'e', meal: 'm', weight: 'w', finance: 'f', plan: 'p', todo: 't', travel: 'tr' };
+    var map = { exercise: 'e', meal: 'm', weight: 'w', finance: 'f', plan: 'p', todo: 't', pending: 'pf', travel: 'tr' };
     var p = map[mod];
     var ids = {
       e: ['e-date', 'e-duration', 'e-calories', 'e-feeling'],
       m: [], w: [],
       f: ['f-date', 'f-amount', 'f-note'], p: ['p-time', 'p-content'],
       t: ['t-due', 't-content', 't-project'],
+      pf: ['pf-content', 'pf-assignee', 'pf-note'],
       tr: ['tr-dest', 'tr-companion', 'tr-cost', 'tr-note']
     }[p];
     ids.forEach(function (id) { if ($(id)) $(id).value = ''; });
@@ -3842,8 +3909,10 @@
     var rDone = finishedThisYear().length;
     var rGoal = state.readingGoal || 24;
 
+    var pendingCount = (state.pending || []).filter(function (p) { return !p.done; }).length;
+
     var cells = [
-      { k: '待办计划', v: todos.length + ' 项（逾期 ' + overdue + ' 项）' },
+      { k: '待办待放', v: todos.length + ' 项待办 / ' + pendingCount + ' 项待放' },
       { k: '今年已读', v: rDone + ' / ' + rGoal + ' 本' },
       { k: '今日锻炼', v: eCount + ' 次' },
       { k: '今日吃饭', v: mCount + ' 餐' },
@@ -3906,12 +3975,13 @@
 
     // 各模块提交
     $('t-submit').addEventListener('click', submitTodo);
+    $('pf-submit').addEventListener('click', submitPending);
     $('tr-submit').addEventListener('click', submitTravel);
 
     // 取消编辑
-    ['e', 'm', 'w', 'f', 't', 'tr'].forEach(function (p) {
+    ['e', 'm', 'w', 'f', 't', 'pf', 'tr'].forEach(function (p) {
       var c = $(p + '-cancel'); if (c) c.addEventListener('click', function () {
-        var mod = { r: 'reading', e: 'exercise', m: 'meal', w: 'weight', f: 'finance', t: 'todo', tr: 'travel' }[p];
+        var mod = { r: 'reading', e: 'exercise', m: 'meal', w: 'weight', f: 'finance', t: 'todo', pf: 'pending', tr: 'travel' }[p];
         cancelEdit(mod); clearForm(mod);
       });
     });
@@ -3931,6 +4001,10 @@
       if (act === 'ex-all') { exSelDate = null; renderExerciseCalendar(); return; }
       if (act === 'chore-toggle') { toggleChore(btn.getAttribute('data-cdate'), btn.getAttribute('data-ckey')); return; }
       if (act === 'chore-set') { openChoreMemberModal(); return; }
+      // 待放计划专属 action
+      if (act === 'toggle-pending') { togglePending(btn.getAttribute('data-id')); return; }
+      if (act === 'edit-pending') { startEditPending(btn.getAttribute('data-id')); return; }
+      if (act === 'del-pending') { deletePending(btn.getAttribute('data-id')); return; }
       var mod = btn.getAttribute('data-mod');
       var idEl = btn.closest('[data-id]'); var id = idEl ? idEl.getAttribute('data-id') : null;
       if (mod === 'book') {
@@ -3973,7 +4047,7 @@
     $('importFile').addEventListener('change', function (e) { if (e.target.files[0]) importData(e.target.files[0]); e.target.value = ''; });
 
     // 设置表单标题默认值
-    ['e', 'm', 'w', 'p', 't', 'tr'].forEach(function (p) {
+    ['e', 'm', 'w', 'p', 't', 'pf', 'tr'].forEach(function (p) {
       var t = $(p + '-FormTitle'); if (t) t.setAttribute('data-default', t.textContent);
     });
 
@@ -4075,7 +4149,7 @@
 
   function renderAll() {
     renderReading(); renderExercise(); renderMeal(); renderWeight(); renderFinance();
-    renderTodo(); renderTravel(); renderChores(); renderOverview();
+    renderTodo(); renderPending(); renderTravel(); renderChores(); renderOverview();
   }
 
   /* ============ 家务排班（沿用家庭管家排班引擎，成员可配置） ============ */

@@ -38,7 +38,7 @@
       <button class="nav-item" data-nav="meal"><span class="nav-ico">🍱</span><span class="nav-label">好好吃饭</span></button>
       <button class="nav-item" data-nav="weight"><span class="nav-ico">⚖️</span><span class="nav-label">体重管理</span></button>
       <button class="nav-item" data-nav="finance"><span class="nav-ico">💰</span><span class="nav-label">理财管理</span></button>
-      <button class="nav-item" data-nav="todo"><span class="nav-ico">💼</span><span class="nav-label">待办计划</span></button>
+      <button class="nav-item" data-nav="todo"><span class="nav-ico">💼</span><span class="nav-label">待办待放</span></button>
       <button class="nav-item" data-nav="travel"><span class="nav-ico">🗺️</span><span class="nav-label">旅游记录</span></button>
       <button class="nav-item" data-nav="chores"><span class="nav-ico">🧹</span><span class="nav-label">家务排班</span></button>
     </nav>
@@ -304,42 +304,66 @@
         </div>
       </section>
 
-      <!-- 模块7：待办计划 -->
+      <!-- 模块7：待办待放 -->
       <section class="panel" data-panel="todo">
         <div class="reminder-banner" id="todoReminder" hidden></div>
-        <div class="card form-card">
-          <div class="form-head"><span id="tFormTitle">添加待办计划</span></div>
-          <div class="form-grid">
-            <label>截止日期 *<input type="date" id="t-due" /></label>
-            <label>优先级 *
-              <select id="t-priority">
-                <option value="紧急重要">紧急重要</option>
-                <option value="重要不紧急" selected>重要不紧急</option>
-                <option value="紧急不重要">紧急不重要</option>
-                <option value="不重要不紧急">不重要不紧急</option>
-              </select>
-            </label>
-            <label>事项内容 *<input type="text" id="t-content" placeholder="任务内容" /></label>
-            <label>所属项目<input type="text" id="t-project" placeholder="如 产品V2.0" /></label>
-            <label>状态 *
-              <select id="t-status">
-                <option value="待办" selected>待办</option>
-                <option value="进行中">进行中</option>
-                <option value="已完成">已完成</option>
-                <option value="已延期">已延期</option>
-              </select>
-            </label>
-            <label class="full"></label>
+        <div class="todo-split-layout">
+          <!-- 左侧：待办计划 -->
+          <div class="todo-col left">
+            <div class="col-title">📋 待办计划</div>
+            <div class="card form-card">
+              <div class="form-head"><span id="tFormTitle">添加待办计划</span></div>
+              <div class="form-grid">
+                <label>截止日期 *<input type="date" id="t-due" /></label>
+                <label>优先级 *
+                  <select id="t-priority">
+                    <option value="紧急重要">紧急重要</option>
+                    <option value="重要不紧急" selected>重要不紧急</option>
+                    <option value="紧急不重要">紧急不重要</option>
+                    <option value="不重要不紧急">不重要不紧急</option>
+                  </select>
+                </label>
+                <label>事项内容 *<input type="text" id="t-content" placeholder="任务内容" /></label>
+                <label>所属项目<input type="text" id="t-project" placeholder="如 产品V2.0" /></label>
+                <label>状态 *
+                  <select id="t-status">
+                    <option value="待办" selected>待办</option>
+                    <option value="进行中">进行中</option>
+                    <option value="已完成">已完成</option>
+                    <option value="已延期">已延期</option>
+                  </select>
+                </label>
+                <label class="full"></label>
+              </div>
+              <div class="form-actions">
+                <button class="btn primary" id="t-submit">添加</button>
+                <button class="btn ghost" id="t-cancel" hidden>取消</button>
+              </div>
+            </div>
+            <div class="list-toolbar">
+              <label class="toggle"><input type="checkbox" id="tShowArchived" /> 显示已归档</label>
+            </div>
+            <div class="list" id="todoList"></div>
           </div>
-          <div class="form-actions">
-            <button class="btn primary" id="t-submit">添加</button>
-            <button class="btn ghost" id="t-cancel" hidden>取消</button>
+
+          <!-- 右侧：待放计划 -->
+          <div class="todo-col right">
+            <div class="col-title">🗂️ 待放计划</div>
+            <div class="card form-card">
+              <div class="form-head"><span id="pfFormTitle">添加待放计划</span></div>
+              <div class="form-grid">
+                <label>待放事项 *<input type="text" id="pf-content" placeholder="要委托/待放出去的事项" /></label>
+                <label>执行人 *<input type="text" id="pf-assignee" placeholder="如：胖崽 / 家人" /></label>
+                <label class="full">备注<input type="text" id="pf-note" placeholder="补充说明（选填）" /></label>
+              </div>
+              <div class="form-actions">
+                <button class="btn primary" id="pf-submit">添加</button>
+                <button class="btn ghost" id="pf-cancel" hidden>取消</button>
+              </div>
+            </div>
+            <div class="list" id="pendingList"></div>
           </div>
         </div>
-        <div class="list-toolbar">
-          <label class="toggle"><input type="checkbox" id="tShowArchived" /> 显示已归档</label>
-        </div>
-        <div class="list" id="todoList"></div>
       </section>
 
       <!-- 模块8：旅游记录 -->

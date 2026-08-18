@@ -439,6 +439,29 @@ body{
 }
 .reminder-banner .rem-btn.primary{ background:var(--primary); color:#fff; border-color:var(--primary); }
 .reminder-banner .rem-hint{ font-size:11px; color:#B0A090; }
+
+/* ===== 待办待放 · 左右双栏布局 ===== */
+.todo-split-layout{ display:flex; gap:16px; align-items:flex-start; }
+.todo-col{ flex:1 1 0; min-width:0; }
+.todo-col .col-title{
+  font-size:15px; font-weight:700; color:var(--text);
+  margin-bottom:10px; padding-left:12px;
+  position:relative;
+}
+.todo-col .col-title::before{
+  content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:4px; height:16px; border-radius:2px;
+  background:linear-gradient(180deg,var(--star-yellow),var(--star-orange));
+}
+.todo-col.left .col-title::before{ background:linear-gradient(180deg,var(--star-yellow),var(--star-orange)); }
+.todo-col.right .col-title::before{ background:linear-gradient(180deg,var(--nav-todo),var(--primary)); }
+
+/* 手机端：堆叠 */
+@media (max-width:680px){
+  .todo-split-layout{ flex-direction:column; gap:14px; }
+  .todo-col .col-title{ font-size:14px; }
+}
+
 @media (min-width:681px){
   .reminder-banner .rem-list{ max-width:680px; }
 }
