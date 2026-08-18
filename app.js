@@ -3095,15 +3095,20 @@
     box.innerHTML = list.map(function (p) {
       var done = p.done;
       var stCls = done ? 'green' : 'muted';
-      var head = '<span' + (done ? ' style="text-decoration:line-through;color:var(--muted)"' : '') + '>' + esc(p.content) + '</span>' +
-        '<span class="tag ' + stCls + '">' + (done ? '已完成' : '待放') + '</span>';
-      var line2 = '执行人：' + esc(p.assignee) + (p.note ? ' · ' + esc(p.note) : '');
+      var stText = done ? '已完成' : '待放';
+      var nameLine = '<span class="pf-name">' + esc(p.content) + '</span>' +
+        '<span class="tag ' + stCls + '">' + stText + '</span>';
+      var infoLines = '<span>' + stText + '</span>' +
+        (p.note ? '<span>备注：' + esc(p.note) + '</span>' : '') +
+        '<span>执行人：' + esc(p.assignee) + '</span>';
       return '<div class="item" data-id="' + p.id + '" data-mod="pending">' +
-        '<div class="body"><div class="line1">' + head + '</div><div class="line2">' + line2 + '</div></div>' +
+        '<div class="body">' +
+        '<div class="line1">' + nameLine +
         '<div class="ops">' +
         '<button class="icon-btn" data-act="toggle-pending" data-id="' + p.id + '" title="' + (done ? '标记未完成' : '标记完成') + '">' + (done ? '↩️' : '✅') + '</button>' +
         '<button class="icon-btn" data-act="edit-pending" data-id="' + p.id + '" title="编辑">✏️</button>' +
-        '<button class="icon-btn" data-act="del-pending" data-id="' + p.id + '" title="删除">🗑️</button></div></div>';
+        '<button class="icon-btn" data-act="del-pending" data-id="' + p.id + '" title="删除">🗑️</button></div></div>' +
+        '<div class="line2">' + infoLines + '</div></div></div>';
     }).join('');
   }
   function togglePending(id) {

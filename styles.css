@@ -441,8 +441,8 @@ body{
 .reminder-banner .rem-hint{ font-size:11px; color:#B0A090; }
 
 /* ===== 待办待放 · 左右双栏布局 ===== */
-.todo-split-layout{ display:flex; gap:16px; align-items:flex-start; }
-.todo-col{ flex:1 1 0; min-width:0; }
+.todo-split-layout{ display:flex; gap:20px; align-items:stretch; }
+.todo-col{ flex:1 1 0; min-width:0; display:flex; flex-direction:column; }
 .todo-col .col-title{
   font-size:15px; font-weight:700; color:var(--text);
   margin-bottom:10px; padding-left:12px;
@@ -456,10 +456,40 @@ body{
 .todo-col.left .col-title::before{ background:linear-gradient(180deg,var(--star-yellow),var(--star-orange)); }
 .todo-col.right .col-title::before{ background:linear-gradient(180deg,var(--nav-todo),var(--primary)); }
 
+/* 表单卡片：让添加按钮区域对齐 */
+.todo-col .form-card{ flex:1 1 auto; display:flex; flex-direction:column; }
+.todo-col .form-card .form-grid{ flex:1 1 auto; }
+.todo-col .form-card .form-actions{ margin-top:auto; padding-top:12px; }
+
+/* 待放列表：横向网格卡片 */
+#pendingList{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
+  gap:12px;
+  margin-top:8px;
+}
+#pendingList .item{
+  flex-direction:column; gap:10px; padding:14px 16px;
+}
+#pendingList .item .body{ width:100%; }
+#pendingList .item .line1{
+  font-size:14px; font-weight:600; flex-wrap:nowrap; gap:10px;
+  justify-content:space-between;
+}
+#pendingList .item .line1 .pf-name{ font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px; }
+#pendingList .item .line2{
+  font-size:12.5px; color:var(--muted); line-height:1.7;
+  display:flex; flex-direction:column; gap:2px;
+}
+#pendingList .item .ops{
+  position:absolute; right:12px; top:14px; gap:4px;
+}
+
 /* 手机端：堆叠 */
 @media (max-width:680px){
   .todo-split-layout{ flex-direction:column; gap:14px; }
   .todo-col .col-title{ font-size:14px; }
+  #pendingList{ grid-template-columns:1fr; }
 }
 
 @media (min-width:681px){
