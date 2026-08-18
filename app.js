@@ -3044,20 +3044,24 @@
     box.innerHTML = list.map(function (t) {
       var overdue = t.status === '已延期';
       var stCls = overdue ? 'red' : t.status === '已完成' ? 'green' : t.status === '进行中' ? '' : 'muted';
-      var head = '<span' + (overdue ? ' style="color:var(--overdue)"' : '') + '>' + esc(t.content) + '</span>' +
-        '<span class="prio-tag ' + esc(t.priority) + '">' + esc(t.priority) + '</span>' +
-        (t.project ? '<span class="tag muted">' + esc(t.project) + '</span>' : '') +
-        (t.isArchived ? '<span class="tag muted">已归档</span>' : '');
-      var line2 = '截止 ' + esc(t.dueDate) + (overdue ? ' · 已逾期' : '');
+      var stText = t.status + (overdue ? '(逾期)' : '');
+      var nameLine = '<span class="pf-name"' + (overdue ? ' style="color:var(--overdue)"' : '') + '>' + esc(t.content) + '</span>' +
+        '<span class="tag ' + stCls + '">' + stText + '</span>';
       var sel = '<select class="status-select" data-act="status" data-mod="todo" data-id="' + t.id + '">' +
         ['待办', '进行中', '已完成', '已延期'].map(function (s) {
           return '<option' + (s === t.status ? ' selected' : '') + '>' + s + '</option>';
         }).join('') + '</select>';
-      return '<div class="item" data-id="' + t.id + '">' +
-        '<div class="body"><div class="line1">' + head + '</div><div class="line2">' + line2 + '</div></div>' +
+      var infoLines = '<span>优先级：' + esc(t.priority) + '</span>' +
+        (t.project ? '<span>项目：' + esc(t.project) + '</span>' : '') +
+        '<span>截止：' + esc(t.dueDate) + (overdue ? ' · 已逾期' : '') + '</span>' +
+        (t.isArchived ? '<span>已归档</span>' : '');
+      return '<div class="item" data-id="' + t.id + '" data-mod="todo">' +
+        '<div class="body">' +
+        '<div class="line1">' + nameLine +
         '<div class="ops">' + sel +
         '<button class="icon-btn" data-act="edit" data-mod="todo" title="编辑">✏️</button>' +
-        '<button class="icon-btn" data-act="del" data-mod="todo" title="删除">🗑️</button></div></div>';
+        '<button class="icon-btn" data-act="del" data-mod="todo" title="删除">🗑️</button></div></div>' +
+        '<div class="line2">' + infoLines + '</div></div></div>';
     }).join('');
     renderTodoReminder();
   }

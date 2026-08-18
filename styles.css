@@ -461,35 +461,37 @@ body{
 .todo-col .form-card .form-grid{ flex:1 1 auto; }
 .todo-col .form-card .form-actions{ margin-top:auto; padding-top:12px; }
 
-/* 待放列表：横向网格卡片 */
-#pendingList{
+/* 待办/待放列表：统一横向网格小卡片 */
+#todoList, #pendingList{
   display:grid;
   grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
   gap:12px;
   margin-top:8px;
 }
-#pendingList .item{
+#todoList .item, #pendingList .item{
   flex-direction:column; gap:10px; padding:14px 16px;
 }
-#pendingList .item .body{ width:100%; }
-#pendingList .item .line1{
+#todoList .item .body, #pendingList .item .body{ width:100%; }
+#todoList .item .line1, #pendingList .item .line1{
   font-size:14px; font-weight:600; flex-wrap:nowrap; gap:10px;
-  justify-content:space-between;
+  justify-content:space-between; align-items:center;
 }
-#pendingList .item .line1 .pf-name{ font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px; }
-#pendingList .item .line2{
+#todoList .item .line1 .pf-name, #pendingList .item .line1 .pf-name{ font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px; }
+#todoList .item .line2, #pendingList .item .line2{
   font-size:12.5px; color:var(--muted); line-height:1.7;
   display:flex; flex-direction:column; gap:2px;
 }
-#pendingList .item .ops{
-  position:absolute; right:12px; top:14px; gap:4px;
+#todoList .item .ops, #pendingList .item .ops{
+  position:absolute; right:12px; top:14px; gap:4px; flex-shrink:0;
 }
+/* 待办状态下拉框在小卡片里缩小 */
+#todoList .status-select{ font-size:11.5px; padding:2px 6px; border-radius:8px; }
 
 /* 手机端：堆叠 */
 @media (max-width:680px){
   .todo-split-layout{ flex-direction:column; gap:14px; }
   .todo-col .col-title{ font-size:14px; }
-  #pendingList{ grid-template-columns:1fr; }
+  #todoList, #pendingList{ grid-template-columns:1fr; }
 }
 
 @media (min-width:681px){
