@@ -8,3 +8,9 @@ deploy/
 .DS_Store
 Thumbs.db
 *.log
+
+# GitHub Actions 保活工作流
+# 说明：推送/修改 .github/workflows/ 下的文件需要 token 具备 workflow 权限，
+# 否则 GitHub 会直接拒绝整个 push。为避免影响正常部署，这里不纳入推送，
+# 请在 GitHub 网页端手动创建该文件（Add file → Create new file）。
+.github/workflows/

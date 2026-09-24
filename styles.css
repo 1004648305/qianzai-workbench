@@ -1592,3 +1592,99 @@ body{
   .splash-text{ font-size:16px; }
   .card::after{ font-size:10px; top:8px; right:10px; }
 }
+
+/* ============================================================
+   模块11：育儿假提醒（奶茶色系 · 红黄绿到期标记）
+   ============================================================ */
+:root{ --nav-parental:#FFD1DC; }              /* 分区色：柔粉（育儿主题） */
+.nav-item[data-nav="parental"]::before{ background:var(--nav-parental); }
+
+/* ---------- 顶部统计卡 ---------- */
+.pl-summary{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+.pl-summary .pl-stat{
+  display:flex; align-items:center; gap:8px;
+  padding:10px 16px; border-radius:14px;
+  background:var(--star-cream); border:1px solid var(--accent-line);
+  font-size:13px; color:var(--text); font-weight:500;
+}
+.pl-summary .pl-stat b{ font-size:18px; font-weight:800; }
+.pl-summary .pl-stat .pl-dot{ width:9px; height:9px; border-radius:50%; flex:0 0 9px; }
+.pl-summary .pl-stat.expired b{ color:#C0453F; }
+.pl-summary .pl-stat.expired .pl-dot{ background:#D9534F; }
+.pl-summary .pl-stat.soon b{ color:#B4821A; }
+.pl-summary .pl-stat.soon .pl-dot{ background:#E8B33A; }
+.pl-summary .pl-stat.ok b{ color:#3E8A5D; }
+.pl-summary .pl-stat.ok .pl-dot{ background:#5CB87F; }
+
+/* ---------- 卡片网格 ---------- */
+.pl-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
+
+.pl-card{
+  background:var(--card-grad); border:1px solid rgba(240,220,200,0.6);
+  border-radius:var(--radius-card); box-shadow:var(--shadow-card);
+  padding:16px 18px; position:relative; overflow:hidden;
+  display:flex; flex-direction:column; gap:9px;
+  transition:box-shadow .3s, transform .25s, border-color .3s;
+}
+.pl-card::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:4px; }
+.pl-card:hover{ box-shadow:var(--shadow-hover); transform:translateY(-2px); border-color:rgba(224,196,172,0.9); }
+
+/* 🔴 已过期 */
+.pl-card.expired{ border-color:rgba(217,83,79,0.30); background:linear-gradient(165deg,#FFF8F7 0%,#FFF2F1 60%,#FFEDEB 100%); }
+.pl-card.expired::before{ background:linear-gradient(180deg,#E8746B,#D9534F); }
+/* 🟡 7天内到期 */
+.pl-card.soon{ border-color:rgba(232,179,58,0.34); background:linear-gradient(165deg,#FFFDF6 0%,#FFF8E4 60%,#FFF4D6 100%); }
+.pl-card.soon::before{ background:linear-gradient(180deg,#F2C75C,#E0A82E); }
+/* 🟢 正常 */
+.pl-card.ok::before{ background:linear-gradient(180deg,#8FD1AC,#5CB87F); }
+/* ⚪ 已处理 */
+.pl-card.handled{ opacity:.62; background:var(--surface); }
+.pl-card.handled::before{ background:linear-gradient(180deg,#D8CCC0,#C0B0A2); }
+
+.pl-head{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.pl-name{ font-size:15px; font-weight:800; color:var(--text); }
+.pl-pill{
+  font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:999px;
+  border:1px solid transparent; white-space:nowrap;
+}
+.pl-pill.expired{ background:rgba(217,83,79,0.12); color:#C0453F; border-color:rgba(217,83,79,0.22); }
+.pl-pill.soon{ background:rgba(232,179,58,0.16); color:#B4821A; border-color:rgba(232,179,58,0.28); }
+.pl-pill.ok{ background:rgba(92,184,127,0.13); color:#3E8A5D; border-color:rgba(92,184,127,0.22); }
+.pl-pill.handled{ background:rgba(176,160,144,0.14); color:#8C7B6C; border-color:rgba(176,160,144,0.24); }
+.pl-ops{ margin-left:auto; display:flex; gap:2px; flex:0 0 auto; }
+
+.pl-meta{ display:flex; flex-wrap:wrap; gap:6px 8px; font-size:12.5px; color:var(--muted); }
+.pl-meta span{ background:var(--surface); border:1px solid rgba(240,220,200,0.7); border-radius:9px; padding:3px 9px; }
+.pl-meta .pl-dept{ background:var(--primary-soft); color:var(--primary-deep); border-color:var(--accent-line); }
+
+.pl-due-line{ font-size:12.5px; color:var(--text); font-weight:600; }
+.pl-due-line .pl-due-val{ color:var(--primary-deep); }
+.pl-card.expired .pl-due-line .pl-due-val{ color:#C0453F; }
+.pl-card.soon .pl-due-line .pl-due-val{ color:#B4821A; }
+.pl-card.ok .pl-due-line .pl-due-val{ color:#3E8A5D; }
+
+.pl-stages{ display:flex; flex-wrap:wrap; gap:6px; font-size:11.5px; color:var(--muted); }
+.pl-stages span{ background:var(--star-cream); border-radius:8px; padding:2px 8px; }
+.pl-note{
+  font-size:12.5px; color:var(--primary-deep); background:var(--star-cream);
+  border-left:3px solid var(--star-orange); border-radius:8px; padding:7px 10px; line-height:1.55;
+}
+
+/* ---------- 今日总览提醒条 ---------- */
+.ov-remind{
+  background:linear-gradient(135deg,#FFF3F0,#FFE8E2);
+  border:1px solid rgba(217,83,79,0.22);
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:16px 20px;
+}
+.ov-remind .ov-remind-inner{ flex:1; min-width:180px; font-size:14.5px; color:var(--text); font-weight:600; }
+.ov-remind .ov-remind-inner b{ font-size:19px; font-weight:800; color:#C0453F; }
+.ov-remind .ov-remind-inner .red{ color:#D9534F; }
+
+/* ---------- 手机端 ---------- */
+@media (max-width:680px){
+  .pl-grid{ grid-template-columns:1fr; }
+  .pl-summary{ gap:10px; }
+  .pl-summary .pl-stat{ padding:8px 12px; font-size:12.5px; }
+  .panel[data-panel="parental"] .form-grid{ grid-template-columns:1fr; }
+  .ov-remind{ padding:14px 16px; }
+}

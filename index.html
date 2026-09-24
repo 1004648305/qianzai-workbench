@@ -15,7 +15,7 @@
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
   <title>倩崽工作台</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=20260924" />
 </head>
 <body>
   <!-- 启动画面（星星人加载动画） -->
@@ -41,6 +41,7 @@
       <button class="nav-item" data-nav="todo"><span class="nav-ico">💼</span><span class="nav-label">待办待放</span></button>
       <button class="nav-item" data-nav="travel"><span class="nav-ico">🗺️</span><span class="nav-label">旅游记录</span></button>
       <button class="nav-item" data-nav="chores"><span class="nav-ico">🧹</span><span class="nav-label">家务排班</span></button>
+      <button class="nav-item" data-nav="parental"><span class="nav-ico">🍼</span><span class="nav-label">育儿假提醒</span></button>
     </nav>
   </aside>
 
@@ -61,6 +62,7 @@
         <!-- 日期头卡片 -->
         <div class="card ov-date-header" id="ovDateHeader"></div>
         <div class="card overview-greet" id="ovGreet">你好，倩崽</div>
+        <div class="card ov-remind" id="ovParentalRemind" hidden></div>
         <div class="ov-grid" id="ovGrid"></div>
         <div class="card ov-quick">
           <div class="ov-quick-title">快捷入口</div>
@@ -390,6 +392,35 @@
       <section class="panel" data-panel="chores">
         <div id="choresMain"></div>
       </section>
+
+      <!-- 模块11：育儿假提醒 -->
+      <section class="panel" data-panel="parental">
+        <div class="card pl-summary" id="plSummary"></div>
+        <div class="card form-card">
+          <div class="form-head"><span id="pl-FormTitle">添加育儿假记录</span></div>
+          <div class="form-grid">
+            <label>姓名 *<input type="text" id="pl-name" placeholder="员工姓名" /></label>
+            <label>一级部门<input type="text" id="pl-dept1" placeholder="如 技术中心" /></label>
+            <label>二级部门<input type="text" id="pl-dept2" placeholder="如 平台研发部" /></label>
+            <label>申请日期<input type="date" id="pl-apply" /></label>
+            <label>出生日期<input type="date" id="pl-birth" /></label>
+            <label>到期日期 *<input type="date" id="pl-due" /></label>
+            <label>0-1周岁<input type="date" id="pl-p01" /></label>
+            <label>1-2周岁<input type="date" id="pl-p12" /></label>
+            <label>2-3周岁<input type="date" id="pl-p23" /></label>
+            <label>提示栏<input type="text" id="pl-note" placeholder="如 需提前提醒员工提交材料" /></label>
+          </div>
+          <div class="form-actions">
+            <button class="btn primary" id="pl-submit">添加</button>
+            <button class="btn ghost" id="pl-cancel" hidden>取消</button>
+          </div>
+        </div>
+        <div class="list-toolbar">
+          <label class="toggle"><input type="checkbox" id="plShowHandled" /> 显示已处理</label>
+          <span class="muted-tip" id="plTip">🟢 正常 · 🟡 7天内到期 · 🔴 已过期</span>
+        </div>
+        <div class="pl-grid" id="parentalList"></div>
+      </section>
     </div>
 
     <!-- 底部导出/导入 -->
@@ -414,6 +445,6 @@
     <div class="toast-wrap" id="toastWrap"></div>
 
   <script src="supabase.min.js?v=20260818i"></script>
-  <script src="app.js?v=20260818i"></script>
+  <script src="app.js?v=20260924"></script>
 </body>
 </html>
