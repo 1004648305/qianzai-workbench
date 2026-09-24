@@ -4126,22 +4126,37 @@
   function monthDays(y,m){ return (LUNAR_INFO[y-1900]&(0x10000>>m))?30:29; }
 
   function solarToLunar(y,m,d){
-    var base=new Date(1900,0,31); var obj=new Date(y,m-1,d);
-    var offset=Math.floor((obj.getTime()-base.getTime())/86400000);
-    var ly=1900,lm,ld,temp,leapFlag=false;
-    for(;ly<2101&&offset>0;){ temp=lunarYearDays(ly); offset-=temp; ly++; }
-    if(offset<0){ offset+=temp; ly--; }
-    lm=1;
-    for(;lm<13&&offset>0;){
-      if(leapMonth(ly)>0&&lm===(leapMonth(ly)+1)&&!leapFlag){ --lm; leapFlag=true; temp=leapDays(ly); }
-      else{ temp=monthDays(ly,lm); leapFlag=false; }
-      if(leapMonth(ly)>0&&lm===leapMonth(ly)+1&&!leapFlag){ ++lm; }
-      offset-=temp; lm++;
+    // 数据表覆盖 1900-01-31 ~ 2049 年，超出范围直接返回空（宁可不显示，也不要显示错的）
+    if(y<1901||y>2049){ return { month:'', day:'', year:0 }; }
+    // 用 UTC 做天数差，避免本地时区/历史夏令时导致整体错一天
+    var base=Date.UTC(1900,0,31); var obj=Date.UTC(y,m-1,d);
+    var offset=Math.floor((obj-base)/86400000);
+    var i,ly,temp=0,ld;
+    for(i=1900;i<2101&&offset>0;i++){ temp=lunarYearDays(i); offset-=temp; }
+    if(offset<0){ offset+=temp; i--; }
+    ly=i;
+    var leap=leapMonth(ly), isLeap=false;
+    for(i=1;i<13&&offset>0;i++){
+      if(leap>0&&i===(leap+1)&&!isLeap){ --i; isLeap=true; temp=leapDays(ly); }
+      else{ temp=monthDays(ly,i); }
+      if(isLeap&&i===(leap+1)){ isLeap=false; }
+      offset-=temp;
     }
-    if(offset===0&&leapMonth(ly)>0&&lm===leapMonth(ly)+1){ if(leapFlag) ld=temp; else{ ld=monthDays(ly,lm); leapFlag=true; } }
-    if(offset<0){ offset+=temp; --lm; leapFlag=false; }
+    // 闰月导致下标重叠，需按偏移量取反
+    if(offset===0&&leap>0&&i===leap+1){
+      if(isLeap){ isLeap=false; } else { isLeap=true; --i; }
+    }
+    if(offset<0){ offset+=temp; --i; }
+    var lm=i;
     ld=offset+1;
-    return { month:LUNAR_MONTHS[lm-1]+'月', day:LUNAR_DAYS[ld-1], year:ly };
+    if(ly<1900||ly>2049||!LUNAR_MONTHS[lm-1]||!LUNAR_DAYS[ld-1]){ return { month:'', day:'', year:0 }; }
+    return { month:(isLeap?'闰':'')+LUNAR_MONTHS[lm-1]+'月', day:LUNAR_DAYS[ld-1], year:ly };
+  }
+
+  // 阿拉伯数字 → 中文按位数字（用于农历年份，如 2026 → 二〇二六）
+  function numToCnDigits(n){
+    var digits=['〇','一','二','三','四','五','六','七','八','九'];
+    return String(n).split('').map(function(c){ return digits[+c] || c; }).join('');
   }
 
   function getZodiacYear(lunarY){
@@ -4149,13 +4164,9 @@
     var stemIdx=(lunarY-4)%10; if(stemIdx<0) stemIdx+=10;
     var branchIdx=(lunarY-4)%12; if(branchIdx<0) branchIdx+=12;
     var s=ZODIAC_STEMS[stemIdx];
-    // 天干简化：丙→〇、丁→一、戊→二、己→三、庚→四、辛→五、壬→六、癸→七
-    var simpleStem={'甲':'一','乙':'二','丙':'〇','丁':'一','戊':'二','己':'三','庚':'四','辛':'五','壬':'六','癸':'七'};
-    var cnNums={'〇':'〇','一':'一','二':'二','三':'三','四':'四','五':'五','六':'六','七':'七'};
-    var cs=simpleStem[s]||s;
     return {
       full: s+ZODIAC_BRANCHES[branchIdx]+'年 '+ZODIAC_ANIMALS[idx],
-      short: '二〇'+cnNums[cs]+'六年 · '+ZODIAC_ANIMALS[idx]
+      short: numToCnDigits(lunarY)+'年 · '+ZODIAC_ANIMALS[idx]
     };
   }
 
@@ -4168,14 +4179,14 @@
       var now = new Date();
       var y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
       var lunar = solarToLunar(y, m, d);
-      var zodiac = getZodiacYear(lunar.year);
+      var zodiac = lunar.month ? getZodiacYear(lunar.year) : null;
       var wday = getWeekDayName(now);
       $('ovDateHeader').innerHTML =
         '<div class="ov-date-info">' +
           '<div class="ov-date-main">' + y + '年' + pad(m) + '月' + pad(d) + '日 · ' + wday + '</div>' +
           '<div class="ov-date-sub">' +
-            '<span>农历 ' + lunar.month + lunar.day + '</span>' +
-            '<span>' + zodiac.short + '</span>' +
+            (lunar.month ? '<span>农历 ' + lunar.month + lunar.day + '</span>' : '') +
+            (zodiac ? '<span>' + zodiac.short + '</span>' : '') +
           '</div>' +
         '</div>' +
         '<img class="ov-date-avatar" src="starman.png?v=20260814" alt="" />';
