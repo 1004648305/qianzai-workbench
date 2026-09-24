@@ -28,7 +28,7 @@ from openpyxl import load_workbook
 
 SRC = r"C:\Users\RWX\Desktop\育儿假.xlsx"
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "parental_seed.js")
-VERSION = "20260924b"
+VERSION = "20260924c"
 SHEET = "Sheet1"
 
 # 字段顺序：与工作台表单一致（表头的中文列名 → 内部字段名）
