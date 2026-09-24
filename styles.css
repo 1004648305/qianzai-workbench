@@ -1670,6 +1670,19 @@ body{
   border-left:3px solid var(--star-orange); border-radius:8px; padding:7px 10px; line-height:1.55;
 }
 
+/* ⚫ 已删除（软删除，可恢复） */
+.pl-card.deleted{
+  opacity:.75; border-style:dashed; border-color:rgba(176,160,144,0.55);
+  background:repeating-linear-gradient(135deg,#FCF9F5,#FCF9F5 9px,#F6F1E9 9px,#F6F1E9 18px);
+}
+.pl-card.deleted::before{ background:linear-gradient(180deg,#C9BCB0,#A8988A); }
+.pl-card.deleted .pl-name{ text-decoration:line-through; color:var(--muted); }
+.pl-card.deleted .pl-due-line .pl-due-val{ color:var(--muted); }
+.pl-pill.deleted{ background:rgba(176,160,144,0.16); color:#7E7064; border-color:rgba(176,160,144,0.30); }
+.pl-summary .pl-stat.deleted b{ color:#7E7064; }
+.pl-summary .pl-stat.deleted .pl-dot{ background:#B0A090; }
+.pl-restore-btn{ font-size:12px; padding:5px 12px; border-radius:9px; }
+
 /* ---------- 今日总览提醒条 ---------- */
 .ov-remind{
   background:linear-gradient(135deg,#FFF3F0,#FFE8E2);

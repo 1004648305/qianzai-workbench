@@ -15,7 +15,7 @@
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
   <title>倩崽工作台</title>
-  <link rel="stylesheet" href="styles.css?v=20260924d" />
+  <link rel="stylesheet" href="styles.css?v=20260924e" />
 </head>
 <body>
   <!-- 启动画面（星星人加载动画） -->
@@ -417,6 +417,7 @@
         </div>
         <div class="list-toolbar">
           <label class="toggle"><input type="checkbox" id="plShowHandled" /> 显示已处理</label>
+          <label class="toggle"><input type="checkbox" id="plShowDeleted" /> 显示已删除</label>
           <span class="muted-tip" id="plTip">🟢 正常 · 🟡 7天内到期 · 🔴 已过期</span>
           <button class="btn ghost sm" id="plSeedBtn" type="button" title="与内置表格数据同步：补齐缺失的人，并更新表格里有改动的字段（你在页面上的「提示栏」和「已处理」标记不会被覆盖）">⬇ 同步内置数据</button>
           <span class="muted-tip" id="plSeedTip"></span>
@@ -447,7 +448,7 @@
     <div class="toast-wrap" id="toastWrap"></div>
 
   <script src="supabase.min.js?v=20260818i"></script>
-  <script src="parental_seed.js?v=20260924d"></script>
-  <script src="app.js?v=20260924d"></script>
+  <script src="parental_seed.js?v=20260924e"></script>
+  <script src="app.js?v=20260924e"></script>
 </body>
 </html>

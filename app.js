@@ -3765,6 +3765,7 @@
     return Math.round((d - t) / 86400000);
   }
   function parentalStatus(p) {
+    if (p.deleted) return { cls: 'deleted', text: '已删除' };
     if (p.handled) return { cls: 'handled', text: '已处理' };
     var n = daysUntil(p.dueDate);
     if (n === null) return { cls: 'ok', text: '未设到期日' };
@@ -3776,26 +3777,37 @@
   // 需提醒的记录：未处理 且（已过期 或 7 天内到期）
   function parentalAlerts() {
     return (state.parental || []).filter(function (p) {
-      if (p.handled) return false;
+      if (p.deleted || p.handled) return false;
       var n = daysUntil(p.dueDate);
       return n !== null && n <= 7;
     });
   }
   function renderParental() {
     var all = state.parental || [];
-    var chk = $('plShowHandled');
-    var showHandled = chk ? chk.checked : false;
-    var list = all.filter(function (p) { return showHandled || !p.handled; });
+    var chkH = $('plShowHandled');
+    var chkD = $('plShowDeleted');
+    var showHandled = chkH ? chkH.checked : false;
+    var showDeleted = chkD ? chkD.checked : false;
+    // 已删除的只在勾选「显示已删除」时出现；已处理的只在勾选「显示已处理」时出现
+    var list = all.filter(function (p) {
+      if (p.deleted) return showDeleted;
+      if (p.handled) return showHandled;
+      return true;
+    });
     // 按到期日期升序（最近的排前面）
     list.sort(function (a, b) {
       var x = a.dueDate || '9999-99-99', y = b.dueDate || '9999-99-99';
       return x < y ? -1 : x > y ? 1 : 0;
     });
 
+    // 统计与提醒一律排除「已删除」
+    var alive = all.filter(function (p) { return !p.deleted; });
+    var deletedCnt = all.length - alive.length;
+    var handledCnt = alive.filter(function (p) { return p.handled; }).length;
     var alerts = parentalAlerts();
     var expired = alerts.filter(function (p) { return daysUntil(p.dueDate) < 0; }).length;
     var soon = alerts.length - expired;
-    var okCnt = all.filter(function (p) {
+    var okCnt = alive.filter(function (p) {
       if (p.handled) return false;
       var n = daysUntil(p.dueDate);
       return n !== null && n > 7;
@@ -3806,13 +3818,24 @@
         '<div class="pl-stat expired"><span class="pl-dot"></span>已过期 <b>' + expired + '</b> 人</div>' +
         '<div class="pl-stat soon"><span class="pl-dot"></span>7天内到期 <b>' + soon + '</b> 人</div>' +
         '<div class="pl-stat ok"><span class="pl-dot"></span>正常 <b>' + okCnt + '</b> 人</div>' +
-        '<div class="pl-stat">合计 <b>' + all.length + '</b> 条记录</div>';
+        '<div class="pl-stat">在用 <b>' + alive.length + '</b> 条</div>' +
+        (deletedCnt ? '<div class="pl-stat deleted"><span class="pl-dot"></span>已删除 <b>' + deletedCnt + '</b> 条</div>' : '');
     }
 
     updateSeedTip();
 
     var box = $('parentalList');
-    if (!list.length) { box.innerHTML = emptyState('🍼', '还没有育儿假记录，添加第一条吧'); return; }
+    if (!list.length) {
+      var hint = '还没有育儿假记录，添加第一条吧';
+      if (all.length) {
+        var parts = [];
+        if (deletedCnt && !showDeleted) parts.push(deletedCnt + ' 条已删除（勾选上方「显示已删除」查看）');
+        if (handledCnt && !showHandled) parts.push(handledCnt + ' 条已处理（勾选上方「显示已处理」查看）');
+        if (parts.length) hint = '当前没有可显示的记录：有 ' + parts.join('；');
+      }
+      box.innerHTML = emptyState('🍼', hint);
+      return;
+    }
 
     box.innerHTML = list.map(function (p) {
       var st = parentalStatus(p);
@@ -3825,10 +3848,11 @@
       if (p.p01) stages.push('<span>0-1周岁 · ' + esc(p.p01) + '</span>');
       if (p.p12) stages.push('<span>1-2周岁 · ' + esc(p.p12) + '</span>');
       if (p.p23) stages.push('<span>2-3周岁 · ' + esc(p.p23) + '</span>');
-      var ops =
-        '<button class="icon-btn" data-act="mark-parental" data-id="' + p.id + '" title="' + (p.handled ? '撤销已处理' : '标记已处理') + '">' + (p.handled ? '↩️' : '✅') + '</button>' +
-        '<button class="icon-btn" data-act="edit" data-mod="parental" data-id="' + p.id + '" title="编辑">✏️</button>' +
-        '<button class="icon-btn" data-act="del" data-mod="parental" data-id="' + p.id + '" title="删除">🗑️</button>';
+      var ops = p.deleted
+        ? '<button class="btn ghost sm pl-restore-btn" data-act="restore-parental" data-id="' + p.id + '" title="恢复到列表">↩️ 恢复</button>'
+        : ('<button class="icon-btn" data-act="mark-parental" data-id="' + p.id + '" title="' + (p.handled ? '撤销已处理' : '标记已处理') + '">' + (p.handled ? '↩️' : '✅') + '</button>' +
+           '<button class="icon-btn" data-act="edit" data-mod="parental" data-id="' + p.id + '" title="编辑">✏️</button>' +
+           '<button class="icon-btn" data-act="del-parental" data-id="' + p.id + '" title="移入已删除（可在「显示已删除」中恢复）">🗑️</button>');
       return '<div class="pl-card ' + st.cls + '" data-id="' + p.id + '">' +
           '<div class="pl-head">' +
             '<span class="pl-name">' + esc(p.name) + '</span>' +
@@ -3862,6 +3886,7 @@
       cancelEdit('parental');
     } else {
       rec.id = uid(); rec.handled = false; rec.handledAt = '';
+      rec.deleted = false; rec.deletedAt = '';
       state.parental.push(rec);
       flashOk($('pl-submit'));
     }
@@ -3874,6 +3899,24 @@
     p.handledAt = p.handled ? TODAY : '';
     saveState(); renderParental(); renderOverview();
     toast(p.handled ? '已标记为已处理' : '已撤销处理标记', 'ok');
+  }
+  // 软删除：只打标记、不真删数据，勾选「显示已删除」即可查看并恢复
+  function deleteParental(id) {
+    var p = (state.parental || []).find(function (x) { return x.id === id; });
+    if (!p) return;
+    if (!confirmDel('移入「已删除」？之后可勾选工具栏的「显示已删除」查看并恢复。')) return;
+    p.deleted = true;
+    p.deletedAt = TODAY;
+    saveState(); renderParental(); renderOverview();
+    toast('已移入「已删除」，可勾选「显示已删除」恢复', 'ok');
+  }
+  function restoreParental(id) {
+    var p = (state.parental || []).find(function (x) { return x.id === id; });
+    if (!p) return;
+    p.deleted = false;
+    p.deletedAt = '';
+    saveState(); renderParental(); renderOverview();
+    toast('已恢复到列表', 'ok');
   }
   // 依据「申请日期 + 出生日期」自动推算三个阶段的区间（只填空缺，不覆盖手填值）
   // 规则（由公司表格 24 条数据反推并逐条验证）：
@@ -3949,6 +3992,7 @@
           updated++;
         } else {
           rec.id = uid(); rec.handled = false; rec.handledAt = '';
+          rec.deleted = false; rec.deletedAt = '';
           if (rec.note === undefined) rec.note = '';
           state.parental.push(rec);
           byKey[k] = rec;
@@ -4274,6 +4318,8 @@
       if (act === 'toggle-pending') { togglePending(btn.getAttribute('data-id')); return; }
       // 育儿假专属 action
       if (act === 'mark-parental') { markParental(btn.getAttribute('data-id')); return; }
+      if (act === 'del-parental') { deleteParental(btn.getAttribute('data-id')); return; }
+      if (act === 'restore-parental') { restoreParental(btn.getAttribute('data-id')); return; }
       if (act === 'go-parental') { goPanel('parental'); return; }
       if (act === 'edit-pending') { startEditPending(btn.getAttribute('data-id')); return; }
       if (act === 'del-pending') { deletePending(btn.getAttribute('data-id')); return; }
@@ -4315,6 +4361,7 @@
 
     // 育儿假：显示已处理开关 + 出生日期自动推算阶段区间 + 手动同步内置数据
     $('plShowHandled').addEventListener('change', renderParental);
+    $('plShowDeleted').addEventListener('change', renderParental);
     $('pl-birth').addEventListener('change', autoFillParentalStages);
     $('plSeedBtn').addEventListener('click', function () {
       var r = importParentalSeed(true);
