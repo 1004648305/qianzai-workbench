@@ -3829,7 +3829,7 @@
         '<button class="icon-btn" data-act="mark-parental" data-id="' + p.id + '" title="' + (p.handled ? '撤销已处理' : '标记已处理') + '">' + (p.handled ? '↩️' : '✅') + '</button>' +
         '<button class="icon-btn" data-act="edit" data-mod="parental" data-id="' + p.id + '" title="编辑">✏️</button>' +
         '<button class="icon-btn" data-act="del" data-mod="parental" data-id="' + p.id + '" title="删除">🗑️</button>';
-      return '<div class="pl-card ' + st.cls + '">' +
+      return '<div class="pl-card ' + st.cls + '" data-id="' + p.id + '">' +
           '<div class="pl-head">' +
             '<span class="pl-name">' + esc(p.name) + '</span>' +
             '<span class="pl-pill ' + st.cls + '">' + st.text + '</span>' +
