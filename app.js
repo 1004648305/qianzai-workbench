@@ -3873,20 +3873,69 @@
     saveState(); renderParental(); renderOverview();
     toast(p.handled ? '已标记为已处理' : '已撤销处理标记', 'ok');
   }
-  // 由出生日期推算三个阶段到期日（只填空缺，不覆盖手填值）
+  // 依据「申请日期 + 出生日期」自动推算三个阶段的区间（只填空缺，不覆盖手填值）
+  // 规则（由公司表格 24 条数据反推并逐条验证）：
+  //   第 N 阶段截止 = 出生日期 + N 年 - 1 天
+  //   第 N 阶段起点 = max(申请日期, 出生日期 + (N-1) 年)
+  //   仅当「起点 <= 截止」且「起点 <= 今天」（该阶段已开始）才填入
+  //   到期日期 = 最后一个「已开始」阶段的截止日（不是固定第 3 阶段）
   function autoFillParentalStages() {
     var b = $('pl-birth').value;
     if (!b) return;
     var bd = new Date(b + 'T00:00:00');
     if (isNaN(bd.getTime())) return;
-    function plusY(z) { var d = new Date(bd.getTime()); d.setFullYear(d.getFullYear() + z); return fmtDate(d); }
-    var trio = { 'pl-p01': plusY(1), 'pl-p12': plusY(2), 'pl-p23': plusY(3) };
-    for (var id in trio) { if ($(id) && !$(id).value) $(id).value = trio[id]; }
-    if ($('pl-due') && !$('pl-due').value) {
-      var cand = [plusY(1), plusY(2), plusY(3)];
-      var future = cand.filter(function (d) { return d >= TODAY; });
-      $('pl-due').value = future.length ? future[0] : cand[2];
+    var aRaw = $('pl-apply').value || TODAY;
+    var aDate = new Date(aRaw + 'T00:00:00');
+    if (isNaN(aDate.getTime())) aDate = new Date(bd.getTime());
+    var todayDate = new Date(TODAY + 'T00:00:00');
+    function shift(y, offDays) {
+      var d = new Date(bd.getTime());
+      d.setFullYear(d.getFullYear() + y);
+      d.setDate(d.getDate() + offDays);
+      return d;
     }
+    function disp(d) { return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()); }
+    function laterOf(d1, d2) { return d1.getTime() >= d2.getTime() ? d1 : d2; }
+    var plan = [
+      { id: 'pl-p01', from: aDate, to: shift(1, -1) },
+      { id: 'pl-p12', from: laterOf(aDate, shift(1, 0)), to: shift(2, -1) },
+      { id: 'pl-p23', from: laterOf(aDate, shift(2, 0)), to: shift(3, -1) }
+    ];
+    var lastEnd = null;
+    plan.forEach(function (it) {
+      if (it.from.getTime() > it.to.getTime() || it.from.getTime() > todayDate.getTime()) return;
+      lastEnd = it.to;   // 已开始的阶段，依次覆盖 → 最终留下最后一个已开始阶段
+      var el = $(it.id);
+      if (el && !el.value) el.value = disp(it.from) + '-' + disp(it.to);
+    });
+    if ($('pl-due') && !$('pl-due').value && lastEnd) $('pl-due').value = fmtDate(lastEnd);
+  }
+
+  /* 内置初始数据合并（来自 parental_seed.js）
+     按「姓名 + 出生日期」去重，只增不改；version 变化时才会再次合并，
+     因此不会在每次刷新时重复添加。 */
+  function applyParentalSeed() {
+    try {
+      var seed = window.PARENTAL_SEED;
+      if (!seed || !seed.rows || !seed.rows.length) return 0;
+      if (state.parentalSeedVersion === seed.version) return 0;
+      var cols = seed.cols || ['name', 'dept1', 'dept2', 'applyDate', 'birthDate', 'p01', 'p12', 'p23', 'dueDate'];
+      var seen = {};
+      (state.parental || []).forEach(function (p) { seen[(p.name || '') + '|' + (p.birthDate || '')] = 1; });
+      var added = 0;
+      seed.rows.forEach(function (row) {
+        var rec = { id: uid(), handled: false, handledAt: '' };
+        for (var i = 0; i < cols.length; i++) rec[cols[i]] = row[i] || '';
+        var k = (rec.name || '') + '|' + (rec.birthDate || '');
+        if (!rec.name || seen[k]) return;
+        seen[k] = 1;
+        state.parental.push(rec);
+        added++;
+      });
+      state.parentalSeedVersion = seed.version;
+      saveState();
+      return added;
+    } catch (e) { console.warn('育儿假初始数据合并跳过:', e); return 0; }
   }
 
   /* ============ 列表项 HTML & 通用删除/编辑 ============ */
@@ -4547,10 +4596,12 @@
 
       tickClock(); setInterval(tickClock, 1000);
       bind();
+      var _plSeedAdded = applyParentalSeed();   // 首次加载：合并内置的育儿假初始数据
       renderAll();
       setupDeadlineNotifications();
       goPanel('overview');
       closeModal();
+      if (_plSeedAdded) toast('已导入 ' + _plSeedAdded + ' 条育儿假记录', 'ok');
     } catch (e) {
       console.error('核心初始化出错：', e);
       hideSplash();

@@ -15,7 +15,7 @@
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
   <title>倩崽工作台</title>
-  <link rel="stylesheet" href="styles.css?v=20260924" />
+  <link rel="stylesheet" href="styles.css?v=20260924b" />
 </head>
 <body>
   <!-- 启动画面（星星人加载动画） -->
@@ -405,9 +405,9 @@
             <label>申请日期<input type="date" id="pl-apply" /></label>
             <label>出生日期<input type="date" id="pl-birth" /></label>
             <label>到期日期 *<input type="date" id="pl-due" /></label>
-            <label>0-1周岁<input type="date" id="pl-p01" /></label>
-            <label>1-2周岁<input type="date" id="pl-p12" /></label>
-            <label>2-3周岁<input type="date" id="pl-p23" /></label>
+            <label>0-1周岁<input type="text" id="pl-p01" placeholder="如 2026/03/20-2027/01/14" /></label>
+            <label>1-2周岁<input type="text" id="pl-p12" placeholder="如 2027/01/15-2028/01/14" /></label>
+            <label>2-3周岁<input type="text" id="pl-p23" placeholder="如 2028/01/15-2029/01/14" /></label>
             <label>提示栏<input type="text" id="pl-note" placeholder="如 需提前提醒员工提交材料" /></label>
           </div>
           <div class="form-actions">
@@ -445,6 +445,7 @@
     <div class="toast-wrap" id="toastWrap"></div>
 
   <script src="supabase.min.js?v=20260818i"></script>
-  <script src="app.js?v=20260924"></script>
+  <script src="parental_seed.js?v=20260924b"></script>
+  <script src="app.js?v=20260924b"></script>
 </body>
 </html>
