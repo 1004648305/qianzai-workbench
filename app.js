@@ -3809,6 +3809,8 @@
         '<div class="pl-stat">合计 <b>' + all.length + '</b> 条记录</div>';
     }
 
+    updateSeedTip();
+
     var box = $('parentalList');
     if (!list.length) { box.innerHTML = emptyState('🍼', '还没有育儿假记录，添加第一条吧'); return; }
 
@@ -3911,31 +3913,77 @@
     if ($('pl-due') && !$('pl-due').value && lastEnd) $('pl-due').value = fmtDate(lastEnd);
   }
 
-  /* 内置初始数据合并（来自 parental_seed.js）
-     按「姓名 + 出生日期」去重，只增不改；version 变化时才会再次合并，
-     因此不会在每次刷新时重复添加。 */
-  function applyParentalSeed() {
+  /* 内置初始数据同步（来自 parental_seed.js）
+     以「姓名 + 出生日期」为唯一键：
+       · 键已存在 → 用表格的值更新该记录（**保留**页面上的「提示栏」与「已处理」标记）
+       · 键不存在 → 新增记录
+     version 未变化时跳过，所以不会每次刷新都重写。
+     force=true 忽略 version，供「同步内置数据」按钮手动触发。 */
+  var DEFAULT_SEED_COLS = ['name', 'dept1', 'dept2', 'applyDate', 'birthDate', 'p01', 'p12', 'p23', 'dueDate'];
+  function parentalSeedInfo() {
+    var s = window.PARENTAL_SEED;
+    return (s && s.rows && s.rows.length) ? { total: s.rows.length, version: s.version } : null;
+  }
+  function importParentalSeed(force) {
     try {
       var seed = window.PARENTAL_SEED;
-      if (!seed || !seed.rows || !seed.rows.length) return 0;
-      if (state.parentalSeedVersion === seed.version) return 0;
-      var cols = seed.cols || ['name', 'dept1', 'dept2', 'applyDate', 'birthDate', 'p01', 'p12', 'p23', 'dueDate'];
-      var seen = {};
-      (state.parental || []).forEach(function (p) { seen[(p.name || '') + '|' + (p.birthDate || '')] = 1; });
-      var added = 0;
+      if (!seed || !seed.rows || !seed.rows.length) return { ok: false, added: 0, updated: 0, total: 0 };
+      if (!force && state.parentalSeedVersion === seed.version) {
+        return { ok: true, added: 0, updated: 0, total: seed.rows.length, skipped: true };
+      }
+      var cols = seed.cols || DEFAULT_SEED_COLS;
+      var byKey = {};
+      (state.parental || []).forEach(function (p) { byKey[(p.name || '') + '|' + (p.birthDate || '')] = p; });
+      var added = 0, updated = 0;
       seed.rows.forEach(function (row) {
-        var rec = { id: uid(), handled: false, handledAt: '' };
-        for (var i = 0; i < cols.length; i++) rec[cols[i]] = row[i] || '';
-        var k = (rec.name || '') + '|' + (rec.birthDate || '');
-        if (!rec.name || seen[k]) return;
-        seen[k] = 1;
-        state.parental.push(rec);
-        added++;
+        var rec = {}, i, j, k, old;
+        for (i = 0; i < cols.length; i++) rec[cols[i]] = row[i] || '';
+        if (!rec.name) return;
+        k = rec.name + '|' + rec.birthDate;
+        old = byKey[k];
+        if (old) {
+          for (j = 0; j < cols.length; j++) {
+            if (cols[j] === 'note') continue;      // 提示栏由页面自己维护，不覆盖
+            old[cols[j]] = rec[cols[j]];
+          }
+          updated++;
+        } else {
+          rec.id = uid(); rec.handled = false; rec.handledAt = '';
+          if (rec.note === undefined) rec.note = '';
+          state.parental.push(rec);
+          byKey[k] = rec;
+          added++;
+        }
       });
       state.parentalSeedVersion = seed.version;
       saveState();
-      return added;
-    } catch (e) { console.warn('育儿假初始数据合并跳过:', e); return 0; }
+      return { ok: true, added: added, updated: updated, total: seed.rows.length };
+    } catch (e) { console.warn('育儿假初始数据同步失败:', e); return { ok: false, added: 0, updated: 0, total: 0 }; }
+  }
+  var plSeedRetried = false;
+  function applyParentalSeed() {
+    var r = importParentalSeed(false);
+    if (!r.ok && !plSeedRetried) {
+      // 内置数据脚本可能还在路上（首次部署时 CDN 传播有延迟），1.5 秒后补一次
+      plSeedRetried = true;
+      setTimeout(function () {
+        var r2 = importParentalSeed(false);
+        if (r2.ok && (r2.added || r2.updated)) {
+          renderParental(); renderOverview();
+          if (r2.added) toast('已导入 ' + r2.added + ' 条育儿假记录', 'ok');
+        }
+        updateSeedTip();
+      }, 1500);
+    }
+    return r;
+  }
+  // 工具栏上的「内置数据」状态提示
+  function updateSeedTip() {
+    var tip = $('plSeedTip');
+    if (!tip) return;
+    var info = parentalSeedInfo();
+    if (!info) { tip.textContent = '⚠ 内置数据未加载，请刷新页面'; return; }
+    tip.textContent = '内置 ' + info.total + ' 条 · ' + (state.parentalSeedVersion === info.version ? '已同步' : '待同步');
   }
 
   /* ============ 列表项 HTML & 通用删除/编辑 ============ */
@@ -4265,9 +4313,16 @@
     // 历史/归档开关
     $('tShowArchived').addEventListener('change', renderTodo);
 
-    // 育儿假：显示已处理开关 + 出生日期自动推算阶段到期日
+    // 育儿假：显示已处理开关 + 出生日期自动推算阶段区间 + 手动同步内置数据
     $('plShowHandled').addEventListener('change', renderParental);
     $('pl-birth').addEventListener('change', autoFillParentalStages);
+    $('plSeedBtn').addEventListener('click', function () {
+      var r = importParentalSeed(true);
+      if (!r.ok) { toast('内置数据未加载，请刷新页面后重试', 'err'); return; }
+      renderParental(); renderOverview();
+      if (r.added || r.updated) toast('同步完成：新增 ' + r.added + ' 条，更新 ' + r.updated + ' 条', 'ok');
+      else toast('已是最新，共 ' + r.total + ' 条', 'ok');
+    });
 
     // 导出/导入
     $('exportBtn').addEventListener('click', exportData);
@@ -4596,12 +4651,12 @@
 
       tickClock(); setInterval(tickClock, 1000);
       bind();
-      var _plSeedAdded = applyParentalSeed();   // 首次加载：合并内置的育儿假初始数据
+      var _plSeed = applyParentalSeed();   // 首次加载：同步内置的育儿假初始数据
       renderAll();
       setupDeadlineNotifications();
       goPanel('overview');
       closeModal();
-      if (_plSeedAdded) toast('已导入 ' + _plSeedAdded + ' 条育儿假记录', 'ok');
+      if (_plSeed.added) toast('已导入 ' + _plSeed.added + ' 条育儿假记录', 'ok');
     } catch (e) {
       console.error('核心初始化出错：', e);
       hideSplash();
