@@ -15,7 +15,7 @@
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
   <title>倩崽工作台</title>
-  <link rel="stylesheet" href="styles.css?v=20261119a" />
+  <link rel="stylesheet" href="styles.css?v=20261119b" />
 </head>
 <body>
   <!-- 启动画面（星星人加载动画） -->
@@ -133,62 +133,27 @@
 
       <!-- 模块3：好好吃饭 -->
       <section class="panel" data-panel="meal">
-        <!-- 顶部打卡状态条 -->
-        <div class="card meal-checkin" id="mealCheckin"></div>
+        <!-- 孕期状态条 -->
+        <div class="card preg-bar" id="mealPregBar"></div>
+
         <!-- 模式 Tab -->
         <div class="w-tabs" id="mealTabs">
-          <button class="active" data-mtab="diary">📸 美食日记</button>
-          <button data-mtab="nutrition">📊 营养追踪</button>
-          <button data-mtab="check">✅ 轻打卡</button>
+          <button class="active" data-mtab="diary">🍱 每日饮食</button>
+          <button data-mtab="nutri">📊 营养分析</button>
         </div>
 
-        <!-- 模式一：美食日记 -->
+        <!-- 每日饮食 -->
         <div class="card meal-pane" data-mpane="diary" id="mealDiaryPane">
-          <div class="list-toolbar">
-            <div class="seg" id="diaryViewSeg">
-              <button class="active" data-dview="wall"><span class="seg-ico">🍱</span>照片墙</button>
-              <button data-dview="timeline"><span class="seg-ico">📋</span>时间线</button>
-              <button data-dview="calendar"><span class="seg-ico">📅</span>日历墙</button>
-            </div>
-          </div>
-          <div class="chart" id="diaryContent"></div>
+          <div class="meal-date-bar" id="mealDateBar"></div>
+          <div class="meal-summary" id="mealDaySummary"></div>
+          <div id="mealList"></div>
         </div>
 
-        <!-- 模式二：营养追踪 -->
-        <div class="card meal-pane" data-mpane="nutrition" id="mealNutriPane" hidden>
-          <div class="meal-nutri-head">
-            <div class="meal-kcal" id="nutriKcal"></div>
-            <button class="btn ghost sm" id="nutriTargetBtn">⚙️ 热量目标</button>
-          </div>
-          <div class="fin-report-grid">
-            <div class="report-card chart">
-              <div class="rep-title">今日营养素占比</div>
-              <div id="nutriDonut"></div>
-            </div>
-            <div class="report-card chart">
-              <div class="rep-title">近 7 日热量趋势</div>
-              <div id="nutriTrend"></div>
-            </div>
-          </div>
-          <div class="report-card chart" style="margin-top:16px">
-            <div class="rep-title">本月按餐别分布</div>
-            <div id="nutriByMeal"></div>
-          </div>
+        <!-- 营养分析 -->
+        <div class="card meal-pane" data-mpane="nutri" id="mealNutriPane" hidden>
+          <div id="mealNutriBody"></div>
         </div>
 
-        <!-- 模式三：轻打卡 -->
-        <div class="card meal-pane" data-mpane="check" id="mealCheckPane" hidden>
-          <div class="list-toolbar">
-            <div class="seg" id="checkViewSeg">
-              <button class="active" data-cview="today"><span class="seg-ico">✅</span>今日打卡</button>
-              <button data-cview="calendar"><span class="seg-ico">📅</span>月度日历</button>
-            </div>
-            <span class="muted-tip" id="checkTip"></span>
-          </div>
-          <div id="checkContent"></div>
-        </div>
-
-        <!-- 悬浮快速记录按钮 -->
         <button class="fab" id="mealFab" title="记录一餐">+</button>
       </section>
 
@@ -414,6 +379,6 @@
     <div class="toast-wrap" id="toastWrap"></div>
 
   <script src="workbuddy-cloud-sdk.js?v=20261119"></script>
-  <script src="app.js?v=20261119b"></script>
+  <script src="app.js?v=20261119c"></script>
 </body>
 </html>

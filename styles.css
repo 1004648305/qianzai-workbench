@@ -1592,3 +1592,154 @@ body{
   .splash-text{ font-size:16px; }
   .card::after{ font-size:10px; top:8px; right:10px; }
 }
+
+/* ============================================================
+   模块3：好好吃饭（孕期营养版）
+   ============================================================ */
+
+/* ---------- 孕期状态条 ---------- */
+.preg-bar{
+  background:linear-gradient(135deg,#FFF8EC 0%,#FFEFD9 100%);
+  border:1px solid var(--brand-border);
+  padding:16px 20px;
+}
+.preg-main{ display:flex; flex-direction:column; gap:6px; }
+.preg-title{ font-size:17px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.preg-title b{ font-size:22px; color:var(--primary-deep); }
+.preg-stage{
+  font-size:12px; font-weight:600; padding:2px 9px; border-radius:999px;
+  background:rgba(232,196,160,0.35); color:#A5794A; border:1px solid rgba(212,165,116,0.35);
+}
+.preg-sub{ font-size:12.5px; color:var(--muted); }
+.preg-progress{ height:6px; border-radius:999px; background:rgba(224,196,172,0.35); overflow:hidden; margin-top:4px; }
+.preg-progress i{ display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,#F5C97A,#E8A85C); transition:width .4s; }
+.preg-bar > #pregSetupBtn{ margin-top:10px; }
+.preg-empty{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+.preg-empty-txt{ font-size:14.5px; font-weight:600; color:var(--text); line-height:1.6; }
+
+/* ---------- 日期切换 ---------- */
+.meal-date-bar{ display:flex; align-items:center; gap:10px; justify-content:center; margin-bottom:12px; }
+.meal-date-txt{ font-size:14px; font-weight:700; color:var(--text); min-width:130px; text-align:center; }
+.meal-date-bar .btn[disabled]{ opacity:.35; cursor:default; }
+
+/* ---------- 当日汇总 ---------- */
+.meal-summary{ padding:14px 16px; border-radius:14px; background:var(--star-cream); border:1px solid var(--accent-line); margin-bottom:16px; }
+.meal-sum-row{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.meal-sum-kcal b{ font-size:26px; font-weight:800; color:var(--text); }
+.meal-sum-kcal span{ font-size:13px; color:var(--muted); margin-left:5px; }
+.meal-sum-pct{ font-size:13px; font-weight:700; }
+.meal-sum-pct.ok{ color:#3E8A5D; } .meal-sum-pct.warn{ color:#B4821A; } .meal-sum-pct.low{ color:#C0663F; }
+.meal-sum-bar{ height:7px; border-radius:999px; background:rgba(224,196,172,0.4); overflow:hidden; margin:8px 0 10px; }
+.meal-sum-bar i{ display:block; height:100%; border-radius:999px; }
+.meal-sum-bar i.ok{ background:linear-gradient(90deg,#8FD1AC,#5CB87F); }
+.meal-sum-bar i.warn{ background:linear-gradient(90deg,#F2C75C,#E0A82E); }
+.meal-sum-bar i.low{ background:linear-gradient(90deg,#F0A882,#E8925C); }
+.meal-sum-tags{ font-size:12.5px; color:var(--muted); }
+
+/* ---------- 餐次分组 ---------- */
+.meal-group{ margin-bottom:18px; }
+.meal-group-head{ display:flex; align-items:center; justify-content:space-between; font-size:13.5px; font-weight:700; color:var(--text); padding:0 2px 8px; }
+.meal-group-sum{ font-size:12.5px; font-weight:600; color:var(--muted); }
+.meal-rec{
+  position:relative; background:#fff; border:1px solid var(--border); border-radius:14px;
+  padding:12px 14px; margin-bottom:9px; box-shadow:var(--shadow-card); transition:box-shadow .2s, transform .15s;
+}
+.meal-rec:hover{ box-shadow:var(--shadow-hover); transform:translateY(-1px); }
+.meal-rec.legacy{ background:var(--surface); border-style:dashed; }
+.meal-rec-top{ display:flex; align-items:center; gap:8px; }
+.meal-rec-name{ flex:1; font-size:14.5px; font-weight:600; color:var(--text); }
+.meal-rec-kcal{ font-size:13px; font-weight:700; color:var(--primary-deep); }
+.meal-rec-ops{ display:flex; gap:2px; margin-left:4px; }
+.meal-rec-foods{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.food-chip{
+  font-size:12px; padding:3px 9px; border-radius:999px;
+  background:var(--primary-soft); color:var(--text); border:1px solid var(--accent-line);
+}
+.food-chip i{ font-style:normal; color:var(--muted); font-size:11px; margin-left:2px; }
+.meal-rec-note{ font-size:12.5px; color:var(--muted); margin-top:7px; }
+.meal-rec-legacy-tip{ font-size:11.5px; color:var(--muted); margin-top:6px; }
+
+/* ---------- 营养分析 ---------- */
+.nutri-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:16px; }
+.nutri-date{ font-size:15px; font-weight:700; color:var(--text); }
+.nutri-stage{ font-size:12.5px; color:var(--muted); margin-top:3px; }
+.nutri-week{ font-size:12.5px; font-weight:700; color:#A5794A; background:rgba(232,196,160,0.28); padding:4px 10px; border-radius:999px; }
+.nutri-list{ display:flex; flex-direction:column; gap:13px; }
+.nutri-row{ display:grid; grid-template-columns:74px 1fr 46px; grid-template-areas:"name val pct" "bar bar bar"; gap:4px 10px; align-items:center; }
+.nutri-name{ grid-area:name; font-size:13px; font-weight:600; color:var(--text); }
+.nutri-val{ grid-area:val; font-size:12.5px; color:var(--muted); }
+.nutri-val b{ font-size:15px; font-weight:700; color:var(--text); }
+.nutri-pct{ grid-area:pct; text-align:right; font-size:12.5px; font-weight:700; }
+.nutri-pct.ok{ color:#3E8A5D; } .nutri-pct.warn{ color:#B4821A; } .nutri-pct.low{ color:#C0663F; }
+.nutri-bar{ grid-area:bar; height:6px; border-radius:999px; background:rgba(224,196,172,0.35); overflow:hidden; }
+.nutri-bar i{ display:block; height:100%; border-radius:999px; }
+.nutri-bar i.ok{ background:linear-gradient(90deg,#8FD1AC,#5CB87F); }
+.nutri-bar i.warn{ background:linear-gradient(90deg,#F2C75C,#E0A82E); }
+.nutri-bar i.low{ background:linear-gradient(90deg,#F0A882,#E8925C); }
+
+.nutri-tips{ margin-top:18px; padding:14px 16px; border-radius:14px; background:var(--star-cream); border:1px solid var(--accent-line); }
+.nutri-tips.ok{ background:rgba(109,190,138,0.10); border-color:rgba(109,190,138,0.28); color:#3E8A5D; font-size:13.5px; font-weight:600; }
+.nutri-tips-title{ font-size:13.5px; font-weight:700; color:var(--text); margin-bottom:9px; }
+.nutri-tip{ display:flex; align-items:flex-start; gap:7px; font-size:12.5px; color:var(--text); line-height:1.65; margin-bottom:7px; }
+.nt-dot{ width:7px; height:7px; border-radius:50%; margin-top:6px; flex:0 0 7px; }
+.nt-dot.ok{ background:#5CB87F; } .nt-dot.warn{ background:#E8B33A; } .nt-dot.low{ background:#E8925C; }
+
+.nutri-trend{ margin-top:18px; }
+.nutri-trend-title{ font-size:13px; font-weight:700; color:var(--text); margin-bottom:9px; }
+.mini-bars{ display:flex; align-items:flex-end; gap:8px; height:96px; padding:0 2px; }
+.mini-bar-col{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:5px; }
+.mini-bar{ width:100%; max-width:26px; border-radius:6px 6px 3px 3px; background:linear-gradient(180deg,#9BD3B2,#5CB87F); min-height:2px; transition:height .3s; }
+.mini-bar.over{ background:linear-gradient(180deg,#F2C75C,#E0A82E); }
+.mini-bar-lb{ font-size:10.5px; color:var(--muted); white-space:nowrap; }
+
+.nutri-disclaimer{ margin-top:18px; padding-top:12px; border-top:1px dashed var(--border); font-size:11.5px; color:var(--muted); line-height:1.7; }
+
+/* ---------- 食材选择器 ---------- */
+.food-picker{ margin:10px 0 6px; border:1px solid var(--accent-line); border-radius:14px; padding:12px; background:var(--star-cream); }
+.fp-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.fp-title{ font-size:13px; font-weight:700; color:var(--text); }
+.fp-count{ font-size:11.5px; color:var(--muted); }
+.fp-chosen{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:9px; }
+.fp-empty{ font-size:12px; color:var(--muted); padding:4px 0; }
+.fp-item{
+  display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px;
+  background:#fff; border:1px solid var(--border-strong); font-size:12px; color:var(--text);
+}
+.fp-item-name i{ font-style:normal; color:var(--muted); font-size:10.5px; margin-left:3px; }
+.fp-qty{ display:inline-flex; align-items:center; gap:3px; }
+.fp-qty button{
+  width:18px; height:18px; border-radius:50%; border:1px solid var(--border-strong);
+  background:#fff; color:var(--primary-deep); font-size:12px; line-height:1; cursor:pointer; padding:0;
+}
+.fp-qty b{ font-size:11.5px; min-width:16px; text-align:center; }
+.fp-del{ border:none; background:none; color:#C0663F; font-size:14px; cursor:pointer; line-height:1; padding:0 2px; }
+.fp-search input{ width:100%; padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:#fff; font-size:13px; color:var(--text); }
+.fp-search input:focus{ outline:none; border-color:var(--primary-deep); box-shadow:0 0 0 3px rgba(232,196,160,0.25); }
+.fp-cats{ display:flex; flex-wrap:wrap; gap:5px; margin:9px 0; }
+.fp-cat{
+  font-size:11.5px; padding:3px 9px; border-radius:999px; border:1px solid var(--border);
+  background:#fff; color:var(--muted); cursor:pointer;
+}
+.fp-cat.active{ background:var(--primary); border-color:var(--primary-deep); color:#6B4A2F; font-weight:700; }
+.fp-list{ max-height:200px; overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:6px; padding-right:2px; }
+.fp-opt{
+  display:flex; align-items:center; gap:6px; padding:7px 10px; border-radius:10px;
+  border:1px solid var(--border); background:#fff; cursor:pointer; text-align:left;
+}
+.fp-opt:hover{ border-color:var(--border-strong); background:var(--hover); }
+.fp-opt.picked{ border-color:#5CB87F; background:rgba(92,184,127,0.10); }
+.fp-opt-name{ font-size:12.5px; color:var(--text); flex:1; }
+.fp-opt-unit{ font-size:10.5px; color:var(--muted); }
+.fp-opt-check{ color:#3E8A5D; font-size:12px; font-weight:700; }
+
+/* ---------- 手机端 ---------- */
+@media (max-width:680px){
+  .preg-bar{ padding:14px 16px; }
+  .preg-title{ font-size:15.5px; }
+  .preg-title b{ font-size:19px; }
+  .meal-sum-kcal b{ font-size:22px; }
+  .nutri-row{ grid-template-columns:66px 1fr 42px; }
+  .fp-list{ grid-template-columns:repeat(auto-fill,minmax(112px,1fr)); max-height:170px; }
+  .mini-bars{ height:80px; gap:5px; }
+  .meal-date-txt{ min-width:112px; font-size:13px; }
+}
