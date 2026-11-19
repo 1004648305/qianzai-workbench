@@ -1743,3 +1743,82 @@ body{
   .mini-bars{ height:80px; gap:5px; }
   .meal-date-txt{ min-width:112px; font-size:13px; }
 }
+
+/* ============================================================
+   模块3 附加：周期食材频次 & 膳食结构建议
+   ============================================================ */
+.freq-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:12px; }
+.freq-title{ font-size:15px; font-weight:700; color:var(--text); }
+.freq-sub{ font-size:12px; color:var(--muted); margin-top:4px; line-height:1.6; }
+.freq-range{ display:flex; gap:7px; margin-bottom:14px; flex-wrap:wrap; }
+.freq-r{
+  font-size:12.5px; padding:5px 14px; border-radius:999px; border:1px solid var(--border);
+  background:#fff; color:var(--muted); cursor:pointer;
+}
+.freq-r:hover{ border-color:var(--border-strong); }
+.freq-r.active{ background:var(--primary); border-color:var(--primary-deep); color:#6B4A2F; font-weight:700; }
+.freq-empty{ padding:28px 16px; text-align:center; font-size:13.5px; color:var(--muted); line-height:1.8; }
+
+.freq-sum{ display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-bottom:18px; }
+.freq-sum-i{
+  background:var(--star-cream); border:1px solid var(--accent-line); border-radius:12px;
+  padding:11px 8px; text-align:center; display:flex; flex-direction:column; gap:3px;
+}
+.freq-sum-i b{ font-size:19px; font-weight:800; color:var(--text); line-height:1.2; }
+.freq-sum-i span{ font-size:11px; color:var(--muted); }
+
+.freq-sec{ margin-bottom:20px; }
+.freq-sec-t{ font-size:13.5px; font-weight:700; color:var(--text); margin-bottom:11px; display:flex; align-items:baseline; gap:8px; }
+.freq-sec-t span{ font-size:11.5px; font-weight:400; color:var(--muted); }
+
+.freq-dist{ display:grid; grid-template-columns:60px 1fr 108px; align-items:center; gap:9px; margin-bottom:7px; }
+.fd-name{ font-size:12.5px; color:var(--text); font-weight:600; }
+.fd-bar{ height:9px; border-radius:999px; background:rgba(224,196,172,0.32); overflow:hidden; }
+.fd-bar i{ display:block; height:100%; border-radius:999px; }
+.fd-num{ font-size:11.5px; color:var(--muted); text-align:right; }
+
+.freq-foods{ display:flex; flex-direction:column; gap:6px; }
+.ff-row{ display:grid; grid-template-columns:88px 1fr 118px; align-items:center; gap:9px; }
+.ff-name{ font-size:12.5px; color:var(--text); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ff-bar{ height:8px; border-radius:999px; background:rgba(224,196,172,0.32); overflow:hidden; }
+.ff-bar i{ display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,#F5C97A,#E8A85C); }
+.ff-num{ font-size:11.5px; color:var(--muted); text-align:right; }
+
+.freq-notice{
+  padding:10px 13px; border-radius:11px; margin-bottom:12px; font-size:12.5px; line-height:1.7;
+  background:rgba(232,179,58,0.12); border:1px solid rgba(232,179,58,0.32); color:#96701A;
+}
+.freq-allok{ padding:14px; border-radius:12px; background:rgba(109,190,138,0.10); border:1px solid rgba(109,190,138,0.28); color:#3E8A5D; font-size:13.5px; font-weight:600; }
+
+.diet-item{ padding:12px 14px; border-radius:13px; border:1px solid var(--border); background:#fff; margin-bottom:9px; }
+.diet-item.over{ border-color:rgba(232,146,92,0.45); background:rgba(232,146,92,0.05); }
+.diet-hd{ display:flex; align-items:center; gap:7px; margin-bottom:7px; }
+.diet-ic{ font-size:15px; }
+.diet-n{ font-size:13.5px; font-weight:700; color:var(--text); flex:1; }
+.diet-num{ font-size:12.5px; font-weight:700; color:#B4821A; }
+.diet-item.over .diet-num{ color:#C0663F; }
+.diet-bar{ height:6px; border-radius:999px; background:rgba(224,196,172,0.35); overflow:hidden; margin-bottom:8px; }
+.diet-bar i{ display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,#F2C75C,#E0A82E); }
+.diet-item.over .diet-bar i{ background:linear-gradient(90deg,#F0A882,#E8925C); }
+.diet-why{ font-size:12px; color:var(--muted); line-height:1.65; }
+.diet-why em{ font-style:normal; color:#A5794A; }
+.diet-advice{ font-size:12.5px; color:var(--text); font-weight:600; line-height:1.65; margin-top:5px; }
+.diet-detail{ font-size:11.5px; color:var(--muted); margin-top:4px; }
+.diet-oklist{ margin-top:11px; padding:10px 12px; border-radius:11px; background:rgba(109,190,138,0.09); font-size:12px; color:#3E8A5D; line-height:1.7; }
+
+.freq-disclaimer{
+  margin-top:18px; padding-top:13px; border-top:1px dashed var(--border);
+  font-size:11.5px; color:var(--muted); line-height:1.8;
+}
+.freq-disclaimer b{ color:var(--text); }
+
+@media (max-width:680px){
+  .freq-sum{ grid-template-columns:repeat(2,1fr); }
+  .freq-sum-i b{ font-size:17px; }
+  .freq-dist{ grid-template-columns:52px 1fr 88px; gap:7px; }
+  .fd-num{ font-size:10.5px; }
+  .ff-row{ grid-template-columns:74px 1fr 96px; gap:7px; }
+  .ff-num{ font-size:10.5px; }
+  .ff-name{ font-size:12px; }
+  .freq-sub{ font-size:11.5px; }
+}

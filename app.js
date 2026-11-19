@@ -1857,6 +1857,7 @@
     var panes = document.querySelectorAll('[data-mpane]');
     for (var i = 0; i < panes.length; i++) panes[i].hidden = panes[i].getAttribute('data-mpane') !== mealTab;
     if (mealTab === 'nutri') renderMealNutri();
+    else if (mealTab === 'freq') renderMealFreq();
     else renderMealDay();
   }
 
@@ -2028,6 +2029,261 @@
       '<div class="nutri-disclaimer">数据参考《中国食物成分表》与《中国孕期妇女膳食指南》估算，仅供记录参考；' +
       '包子、饺子等带馅面点按常见配方估算，不同店家馅料与用油差别较大，数值可能明显偏高或偏低。' +
       '叶酸补充剂、钙铁剂等是否服用请遵医嘱，本表不构成医疗建议。</div>';
+  }
+
+  /* ---------- 周期食材频次 & 膳食结构建议 ----------
+     依据：《中国居民膳食指南（2022）》平衡膳食八准则（中国营养学会）
+           《中国孕期妇女平衡膳食宝塔（2022）》（中国营养学会妇幼营养分会）
+     口径：只统计带 foods 明细的记录；「某天吃过某类 = 1 天」，
+           按「本周期有记录的天数」折算成每周天数。
+           未记录 ≠ 没吃，所以「偏少」只代表记录里偏少，不代表实际摄入不足。 */
+  var mealFreqDays = 7;
+  var DARK_VEG_KEYS = ['spinach', 'broccoli', 'bokchoy', 'carrot', 'tomato', 'pumpkin', 'pepper'];
+  var DIET_GROUPS = [
+    { k: 'veg', n: '蔬菜', icon: '🥬', cat: '蔬菜', goal: 7, unit: '天/周',
+      why: '餐餐有蔬菜；孕期每天 400~500g', src: '准则三 / 孕期宝塔',
+      advice: '每餐加一份蔬菜，优先深绿色、橘红色', foods: ['菠菜', '西兰花', '油菜', '番茄', '胡萝卜'] },
+    { k: 'fruit', n: '水果', icon: '🍎', cat: '水果', goal: 7, unit: '天/周',
+      why: '天天吃水果；孕期每天 200~300g（孕晚期 200~350g）', src: '准则三 / 孕期宝塔',
+      advice: '每天一个拳头大小的新鲜水果，别用果汁代替', foods: ['苹果', '橙子', '猕猴桃', '蓝莓', '草莓'] },
+    { k: 'milk', n: '奶类', icon: '🥛', keys: ['milk', 'yogurt', 'cheese'], goal: 7, unit: '天/周',
+      why: '每天 300ml 以上液态奶；孕期 300~500g（补钙）', src: '准则三 / 孕期宝塔',
+      advice: '早晚各一杯奶或酸奶', foods: ['牛奶', '酸奶', '奶酪'] },
+    { k: 'egg', n: '蛋类', icon: '🥚', keys: ['egg', 'yolk', 'duckegg', 'teaeegg', 'friedEgg'], goal: 7, unit: '天/周',
+      why: '每天 1 个鸡蛋（约 50g），吃蛋不弃蛋黄', src: '准则四 / 孕期宝塔',
+      advice: '每天一个全蛋', foods: ['鸡蛋', '茶叶蛋', '煎蛋'] },
+    { k: 'fish', n: '鱼虾水产', icon: '🐟', cat: '水产', goal: 2, unit: '天/周',
+      why: '每周最好吃鱼 2 次或 300~500g；孕期鱼虾 50~75g/天，优选深海鱼补 DHA', src: '准则四 / 孕期宝塔',
+      advice: '每周安排 2 餐鱼虾', foods: ['三文鱼', '鲈鱼', '带鱼', '鳕鱼', '虾'] },
+    { k: 'seaweed', n: '海藻类', icon: '🌿', keys: ['kelp', 'nori'], goal: 1, unit: '次/周',
+      why: '孕期每周至少摄入 1 次海藻类（补碘）', src: '孕期宝塔',
+      advice: '每周一次海带/紫菜汤', foods: ['海带(鲜)', '紫菜(干)'] },
+    { k: 'organ', n: '动物血/肝脏', icon: '🩸', keys: ['liver', 'porkblood'], goal: 1, max: 2, unit: '次/周',
+      why: '孕期每周 1~2 次动物血或肝脏（补铁、叶酸）', src: '孕期宝塔',
+      advice: '每周 1~2 次即可，优先动物血；肝脏每次 25~50g，不宜天天吃', foods: ['猪血', '猪肝'] },
+    { k: 'whole', n: '全谷物杂豆', icon: '🌾',
+      keys: ['brownrice', 'oat', 'bread', 'millet', 'corn', 'babaoCongee', 'redbeanCongee'], goal: 7, unit: '天/周',
+      why: '孕期每天全谷物和杂豆 75~100g（孕晚期 75~125g）', src: '孕期宝塔',
+      advice: '把部分白米白面换成粗粮杂豆', foods: ['糙米饭', '燕麦片', '全麦面包', '小米粥', '八宝粥', '玉米'] }
+  ];
+  var FREQ_CAT_ORDER = ['谷薯', '豆制品', '蔬菜', '水果', '畜禽', '水产', '蛋奶', '坚果', '调味'];
+  var FREQ_CAT_COLOR = {
+    '谷薯': '#E8A85C', '豆制品': '#C9A87C', '蔬菜': '#7FB98C', '水果': '#E8925C',
+    '畜禽': '#D98B7A', '水产': '#6FA8C4', '蛋奶': '#D6B86B', '坚果': '#A98C6B', '调味': '#B8AFA4'
+  };
+
+  function groupFoodKeys(g) {
+    if (g.keys) return g.keys;
+    return FOOD_DB.filter(function (r) { return r[2] === g.cat; }).map(function (r) { return r[0]; });
+  }
+
+  function freqRecords(days) {
+    var from = dateAdd(TODAY, -(days - 1));
+    return (state.meal || []).filter(function (r) {
+      return r.date >= from && r.date <= TODAY && r.foods && r.foods.length;
+    });
+  }
+
+  function renderMealFreq() {
+    var box = $('mealFreqBody'); if (!box) return;
+    var days = mealFreqDays;
+    var from = dateAdd(TODAY, -(days - 1));
+    var recs = freqRecords(days);
+
+    // ---- 基础统计 ----
+    var daySet = {}, counter = {}, catCount = {}, catKinds = {}, catGram = {};
+    var totalOcc = 0, totalGram = 0, vegGram = 0, darkGram = 0, breakfastDays = {};
+    recs.forEach(function (r) {
+      daySet[r.date] = 1;
+      if (r.mealType === '早餐') breakfastDays[r.date] = 1;
+      (r.foods || []).forEach(function (f) {
+        var d = FOOD_MAP[f.k]; if (!d) return;
+        var q = f.q || 1, w = d.g * q;
+        if (!counter[f.k]) counter[f.k] = { k: f.k, occ: 0, q: 0, g: 0 };
+        counter[f.k].occ++; counter[f.k].q += q; counter[f.k].g += w;
+        totalOcc++; totalGram += w;
+        if (!catCount[d.cat]) { catCount[d.cat] = 0; catKinds[d.cat] = {}; catGram[d.cat] = 0; }
+        catCount[d.cat]++; catKinds[d.cat][f.k] = 1; catGram[d.cat] += w;
+        if (d.cat === '蔬菜') { vegGram += w; if (DARK_VEG_KEYS.indexOf(f.k) >= 0) darkGram += w; }
+      });
+    });
+    var M = Object.keys(daySet).length;                 // 有记录的天数
+    var bfDays = Object.keys(breakfastDays).length;
+    var enough = M >= 3;
+
+    // ---- 食物多样性：按 7 天一段切片，算「平均每周种类」 ----
+    var chunks = [], d = from;
+    while (d <= TODAY) {
+      var e = dateAdd(d, 6); if (e > TODAY) e = TODAY;
+      var seg = {};
+      recs.forEach(function (r) {
+        if (r.date >= d && r.date <= e) (r.foods || []).forEach(function (f) { seg[f.k] = 1; });
+      });
+      chunks.push(Object.keys(seg).length);
+      d = dateAdd(e, 1);
+    }
+    var avgVariety = chunks.length
+      ? Math.round(chunks.reduce(function (a, b) { return a + b; }, 0) / chunks.length * 10) / 10 : 0;
+    var totalKinds = Object.keys(counter).length;
+    var darkPct = vegGram ? Math.round(darkGram / vegGram * 100) : 0;
+
+    // ---- 各组「吃过几天」→ 折算每周 ----
+    function groupDayCount(g) {
+      var ks = groupFoodKeys(g), s = {};
+      recs.forEach(function (r) {
+        if ((r.foods || []).some(function (f) { return ks.indexOf(f.k) >= 0; })) s[r.date] = 1;
+      });
+      return Object.keys(s).length;
+    }
+    function weekly(dc) { return M ? Math.round(dc / M * 7 * 10) / 10 : 0; }
+
+    var advice = [];
+    var POOL = ['spinach', 'broccoli', 'salmon', 'milk', 'egg', 'oat', 'blueberry',
+      'walnut', 'kelp', 'tofu_n', 'sweetpotato', 'orange'];
+    var tryFoods = POOL.filter(function (k) { return !counter[k] && FOOD_MAP[k]; })
+      .map(function (k) { return FOOD_MAP[k].n; }).slice(0, 5);
+    advice.push({
+      n: '食物种类', icon: '🌈', cur: avgVariety, goal: 25, unit: '种/周',
+      pct: Math.min(100, Math.round(avgVariety / 25 * 100)), ok: avgVariety >= 25,
+      why: '平均每天 12 种以上、每周 25 种以上食物', src: '准则一',
+      advice: tryFoods.length ? '多换着吃，可以试试：' + tryFoods.join('、') : '继续变换食材种类',
+      detail: '本周期共 ' + totalKinds + ' 种食材'
+    });
+    advice.push({
+      n: '深色蔬菜占比', icon: '🥦', cur: darkPct, goal: 50, unit: '%',
+      pct: Math.min(100, darkPct), ok: darkPct >= 50,
+      why: '深色蔬菜应占蔬菜总量 1/2 以上（深绿/橘红/紫红）', src: '准则三',
+      advice: '菠菜、西兰花、胡萝卜、番茄、南瓜、青椒换着吃',
+      detail: '蔬菜累计 ' + Math.round(vegGram) + 'g，按记录重量估算'
+    });
+    advice.push({
+      n: '吃早餐', icon: '🌅', cur: weekly(bfDays), goal: 7, unit: '天/周',
+      pct: Math.min(100, Math.round(weekly(bfDays) / 7 * 100)), ok: weekly(bfDays) >= 7,
+      why: '合理安排一日三餐，不漏餐，每天吃早餐', src: '准则六',
+      advice: '每天记一顿早餐，主食 + 蛋/奶 + 蔬果更均衡',
+      detail: '本周期吃过 ' + bfDays + ' 天早餐'
+    });
+    DIET_GROUPS.forEach(function (g) {
+      var dc = groupDayCount(g), w = weekly(dc);
+      advice.push({
+        n: g.n, icon: g.icon, cur: w, goal: g.goal, unit: g.unit,
+        pct: Math.min(100, Math.round(w / g.goal * 100)),
+        ok: w >= g.goal && !(g.max && w > g.max),
+        why: g.why, src: g.src, advice: g.advice,
+        detail: '本周期吃过 ' + dc + ' 天' + (g.max ? '（上限 ' + g.max + ' 次/周）' : ''),
+        over: g.max && w > g.max
+      });
+    });
+    advice.sort(function (a, b) {
+      if (a.ok !== b.ok) return a.ok ? 1 : -1;
+      return a.pct - b.pct;
+    });
+    var gaps = advice.filter(function (a) { return !a.ok; });
+    var oks = advice.filter(function (a) { return a.ok; });
+
+    // ---- 渲染：周期切换 + 概览 ----
+    var html =
+      '<div class="freq-head">' +
+      '<div><div class="freq-title">📈 周期内饮食结构</div>' +
+      '<div class="freq-sub">' + from + ' ~ ' + TODAY + ' · 共 ' + days + ' 天 · 有记录 ' + M + ' 天 · ' + recs.length + ' 餐（仅有食材明细的记录参与统计）</div></div>' +
+      '</div>' +
+      '<div class="freq-range">' +
+      [7, 30, 90].map(function (n) {
+        return '<button class="freq-r' + (n === days ? ' active' : '') + '" data-fdays="' + n + '">近 ' + n + ' 天</button>';
+      }).join('') + '</div>';
+
+    if (!recs.length) {
+      box.innerHTML = html +
+        '<div class="freq-empty">这个周期内还没有带食材明细的记录。<br>点右下角 + 记一餐，选了食材之后这里就会开始统计。</div>' +
+        '<div class="freq-disclaimer">依据：《中国居民膳食指南（2022）》平衡膳食八准则、' +
+        '《中国孕期妇女平衡膳食宝塔（2022）》（中国营养学会妇幼营养分会）。</div>';
+      box.querySelectorAll('[data-fdays]').forEach(bindFreqRange);
+      return;
+    }
+
+    html +=
+      '<div class="freq-sum">' +
+      '<div class="freq-sum-i"><b>' + totalKinds + '</b><span>种食材</span></div>' +
+      '<div class="freq-sum-i"><b>' + totalOcc + '</b><span>次出现</span></div>' +
+      '<div class="freq-sum-i"><b>' + avgVariety + '</b><span>种/周（目标 25）</span></div>' +
+      '<div class="freq-sum-i"><b>' + Math.round(totalGram) + '</b><span>g 累计主要食材</span></div>' +
+      '</div>';
+
+    // ---- 分类分布 ----
+    var catRows = FREQ_CAT_ORDER.map(function (c) {
+      return { c: c, occ: catCount[c] || 0, kinds: Object.keys(catKinds[c] || {}).length };
+    }).filter(function (x) { return x.occ > 0; }).sort(function (a, b) { return b.occ - a.occ; });
+    var maxCat = catRows.length ? catRows[0].occ : 1;
+    html += '<div class="freq-sec"><div class="freq-sec-t">食物类别分布 <span>按出现次数</span></div>' +
+      catRows.map(function (x) {
+        return '<div class="freq-dist">' +
+          '<span class="fd-name">' + esc(x.c) + '</span>' +
+          '<div class="fd-bar"><i style="width:' + Math.round(x.occ / maxCat * 100) + '%;background:' + (FREQ_CAT_COLOR[x.c] || '#ccc') + '"></i></div>' +
+          '<span class="fd-num">' + x.occ + ' 次 · ' + x.kinds + ' 种</span>' +
+          '</div>';
+      }).join('') + '</div>';
+
+    // ---- 食材频次 Top 15 ----
+    var top = Object.keys(counter).map(function (k) { return counter[k]; })
+      .sort(function (a, b) { return b.occ - a.occ || b.g - a.g; }).slice(0, 15);
+    var maxOcc = top.length ? top[0].occ : 1;
+    html += '<div class="freq-sec"><div class="freq-sec-t">常吃食材 Top ' + top.length + ' <span>按出现次数</span></div>' +
+      '<div class="freq-foods">' + top.map(function (x) {
+        var d = FOOD_MAP[x.k];
+        return '<div class="ff-row">' +
+          '<span class="ff-name">' + esc(d.n) + '</span>' +
+          '<div class="ff-bar"><i style="width:' + Math.round(x.occ / maxOcc * 100) + '%"></i></div>' +
+          '<span class="ff-num">' + x.occ + ' 次 · 约 ' + Math.round(x.g) + 'g</span>' +
+          '</div>';
+      }).join('') + '</div></div>';
+
+    // ---- 科学建议 ----
+    html += '<div class="freq-sec"><div class="freq-sec-t">💡 可以增加的饮食 <span>对照指南，按有记录的 ' + M + ' 天折算成每周</span></div>';
+    if (!enough) {
+      html += '<div class="freq-notice">⚠️ 目前只有 ' + M + ' 天有记录，样本偏少，下面的达标判定仅供参考；' +
+        '再记 ' + (3 - M) + ' 天会更准。没记录不等于没吃。</div>';
+    }
+    if (!gaps.length) {
+      html += '<div class="freq-allok">🎉 记录里各类食物都达到指南的频次要求了，继续保持～</div>';
+    } else {
+      html += gaps.slice(0, 8).map(function (a) {
+        return '<div class="diet-item' + (a.over ? ' over' : '') + '">' +
+          '<div class="diet-hd"><span class="diet-ic">' + a.icon + '</span>' +
+          '<span class="diet-n">' + esc(a.n) + '</span>' +
+          '<span class="diet-num">' + a.cur + ' / ' + a.goal + ' ' + a.unit + '</span></div>' +
+          '<div class="diet-bar"><i style="width:' + a.pct + '%"></i></div>' +
+          '<div class="diet-why">' + esc(a.why) + ' <em>〔' + esc(a.src) + '〕</em></div>' +
+          '<div class="diet-advice">→ ' + esc(a.advice) + '</div>' +
+          '<div class="diet-detail">' + esc(a.detail) + (a.over ? ' · 已超过建议上限，注意别过量' : '') + '</div>' +
+          '</div>';
+      }).join('');
+    }
+    if (oks.length) {
+      html += '<div class="diet-oklist">✅ 已达标 ' + oks.length + ' 项：' +
+        oks.map(function (a) { return a.icon + ' ' + esc(a.n); }).join('、') + '</div>';
+    }
+    html += '</div>';
+
+    // ---- 依据与局限 ----
+    html += '<div class="freq-disclaimer">' +
+      '<b>依据</b>：中国营养学会《中国居民膳食指南（2022）》平衡膳食八准则；' +
+      '中国营养学会妇幼营养分会《中国孕期妇女平衡膳食宝塔（2022）》。<br>' +
+      '<b>局限</b>：只统计你记下的「主要食材」，没记的餐和配菜不计入；未记录 ≠ 没吃，' +
+      '所以「偏少」只代表记录里偏少，不代表实际摄入不足。折算按有记录的 ' + M + ' 天线性换算，' +
+      '深色蔬菜占比按记录重量估算。<br>' +
+      '<b>安全提示</b>：动物肝脏维生素 A 含量很高，每周 1~2 次、每次 25~50g 即可，不宜天天吃；' +
+      '若正在服用含维生素 A 的孕期复合维生素，请先咨询产科医生。' +
+      '贫血、妊娠糖尿病等情况请以产检医生和营养师的方案为准，本表不构成医疗建议。</div>';
+
+    box.innerHTML = html;
+    box.querySelectorAll('[data-fdays]').forEach(bindFreqRange);
+  }
+
+  function bindFreqRange(b) {
+    b.addEventListener('click', function () {
+      mealFreqDays = parseInt(b.getAttribute('data-fdays'), 10);
+      renderMealFreq();
+    });
   }
 
   /* ---------- 记录弹窗 ---------- */

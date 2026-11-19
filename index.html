@@ -15,7 +15,7 @@
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
   <title>倩崽工作台</title>
-  <link rel="stylesheet" href="styles.css?v=20261119b" />
+  <link rel="stylesheet" href="styles.css?v=20261119c" />
 </head>
 <body>
   <!-- 启动画面（星星人加载动画） -->
@@ -140,6 +140,7 @@
         <div class="w-tabs" id="mealTabs">
           <button class="active" data-mtab="diary">🍱 每日饮食</button>
           <button data-mtab="nutri">📊 营养分析</button>
+          <button data-mtab="freq">📈 食材频次</button>
         </div>
 
         <!-- 每日饮食 -->
@@ -152,6 +153,11 @@
         <!-- 营养分析 -->
         <div class="card meal-pane" data-mpane="nutri" id="mealNutriPane" hidden>
           <div id="mealNutriBody"></div>
+        </div>
+
+        <!-- 周期食材频次 & 膳食结构建议 -->
+        <div class="card meal-pane" data-mpane="freq" id="mealFreqPane" hidden>
+          <div id="mealFreqBody"></div>
         </div>
 
         <button class="fab" id="mealFab" title="记录一餐">+</button>
@@ -379,6 +385,6 @@
     <div class="toast-wrap" id="toastWrap"></div>
 
   <script src="workbuddy-cloud-sdk.js?v=20261119"></script>
-  <script src="app.js?v=20261119e"></script>
+  <script src="app.js?v=20261119f"></script>
 </body>
 </html>
