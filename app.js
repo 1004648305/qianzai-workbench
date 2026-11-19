@@ -11,7 +11,7 @@
 
   var EMPTY = {
     reading: [], notes: [], exercise: [], meal: [], weight: [], finance: [],
-    plan: [], todo: [], pending: [], life: [], travel: [], parental: [],
+    plan: [], todo: [], pending: [], life: [], travel: [],
     choreMembers: [ { id: 'a', name: '倩崽', color: '#4FA67E' }, { id: 'b', name: '胖崽', color: '#7FB1C9' } ],
     choreDone: {},
     lifeLists: [], lifeItems: [], lifeGroups: [], lifeTemplates: [],
@@ -606,7 +606,7 @@
   var TITLES = {
     overview: '今日总览', reading: '每月阅读', exercise: '锻炼身体', meal: '好好吃饭',
     weight: '体重管理', finance: '理财管理', todo: '待办待放',
-    travel: '旅游记录', chores: '家务排班', parental: '育儿假提醒'
+    travel: '旅游记录', chores: '家务排班'
   };
   // 每个模块对应的星星人造型图
   var MODULE_STARMAN = {
@@ -618,8 +618,7 @@
     finance:  'star-finance.png',
     todo:     'star-todo.png',
     travel:   'star-travel.png',
-    chores:   'star-chores.png',
-    parental: 'starman.png'
+    chores:   'star-chores.png'
   };
 
   function goPanel(name) {
@@ -639,7 +638,6 @@
     if (sm) sm.src = (MODULE_STARMAN[name] || 'starman.png') + '?v=20260814';
     if (name === 'overview') renderOverview();
     if (name === 'finance') renderFinance();
-    if (name === 'parental') renderParental();
   }
 
   /* ============ 通用：增/改/删 框架 ============ */
@@ -649,7 +647,7 @@
     editing[mod] = id;
     var map = {
       exercise: 'e', meal: 'm', weight: 'w', finance: 'f',
-      plan: 'p', todo: 't', travel: 'tr', parental: 'pl'
+      plan: 'p', todo: 't', travel: 'tr'
     };
     var p = map[mod];
     $(p + '-submit').textContent = '保存修改';
@@ -658,7 +656,7 @@
   }
   function cancelEdit(mod) {
     editing[mod] = null;
-    var map = { reading: 'r', exercise: 'e', meal: 'm', weight: 'w', finance: 'f', plan: 'p', todo: 't', pending: 'pf', travel: 'tr', parental: 'pl' };
+    var map = { reading: 'r', exercise: 'e', meal: 'm', weight: 'w', finance: 'f', plan: 'p', todo: 't', pending: 'pf', travel: 'tr' };
     var p = map[mod];
     $(p + '-submit').textContent = '添加';
     $(p + '-cancel').hidden = true;
@@ -3869,281 +3867,6 @@
     saveState(); clearForm('travel'); renderTravel();
   }
 
-  /* ============ 模块11：育儿假提醒 ============ */
-  // 到期状态：🔴已过期 / 🟡7天内到期 / 🟢正常 / ⚪已处理
-  function daysUntil(dateStr) {
-    if (!dateStr) return null;
-    var t = new Date(TODAY + 'T00:00:00').getTime();
-    var d = new Date(dateStr + 'T00:00:00').getTime();
-    if (isNaN(d)) return null;
-    return Math.round((d - t) / 86400000);
-  }
-  function parentalStatus(p) {
-    if (p.deleted) return { cls: 'deleted', text: '已删除' };
-    if (p.handled) return { cls: 'handled', text: '已处理' };
-    var n = daysUntil(p.dueDate);
-    if (n === null) return { cls: 'ok', text: '未设到期日' };
-    if (n < 0) return { cls: 'expired', text: '已过期 ' + Math.abs(n) + ' 天' };
-    if (n === 0) return { cls: 'soon', text: '今天到期' };
-    if (n <= 7) return { cls: 'soon', text: n + ' 天后到期' };
-    return { cls: 'ok', text: n + ' 天后到期' };
-  }
-  // 需提醒的记录：未处理 且（已过期 或 7 天内到期）
-  function parentalAlerts() {
-    return (state.parental || []).filter(function (p) {
-      if (p.deleted || p.handled) return false;
-      var n = daysUntil(p.dueDate);
-      return n !== null && n <= 7;
-    });
-  }
-  function renderParental() {
-    var all = state.parental || [];
-    var chkH = $('plShowHandled');
-    var chkD = $('plShowDeleted');
-    var showHandled = chkH ? chkH.checked : false;
-    var showDeleted = chkD ? chkD.checked : false;
-    // 已删除的只在勾选「显示已删除」时出现；已处理的只在勾选「显示已处理」时出现
-    var list = all.filter(function (p) {
-      if (p.deleted) return showDeleted;
-      if (p.handled) return showHandled;
-      return true;
-    });
-    // 按到期日期升序（最近的排前面）
-    list.sort(function (a, b) {
-      var x = a.dueDate || '9999-99-99', y = b.dueDate || '9999-99-99';
-      return x < y ? -1 : x > y ? 1 : 0;
-    });
-
-    // 统计与提醒一律排除「已删除」
-    var alive = all.filter(function (p) { return !p.deleted; });
-    var deletedCnt = all.length - alive.length;
-    var handledCnt = alive.filter(function (p) { return p.handled; }).length;
-    var alerts = parentalAlerts();
-    var expired = alerts.filter(function (p) { return daysUntil(p.dueDate) < 0; }).length;
-    var soon = alerts.length - expired;
-    var okCnt = alive.filter(function (p) {
-      if (p.handled) return false;
-      var n = daysUntil(p.dueDate);
-      return n !== null && n > 7;
-    }).length;
-    var sum = $('plSummary');
-    if (sum) {
-      sum.innerHTML =
-        '<div class="pl-stat expired"><span class="pl-dot"></span>已过期 <b>' + expired + '</b> 人</div>' +
-        '<div class="pl-stat soon"><span class="pl-dot"></span>7天内到期 <b>' + soon + '</b> 人</div>' +
-        '<div class="pl-stat ok"><span class="pl-dot"></span>正常 <b>' + okCnt + '</b> 人</div>' +
-        '<div class="pl-stat">在用 <b>' + alive.length + '</b> 条</div>' +
-        (deletedCnt ? '<div class="pl-stat deleted"><span class="pl-dot"></span>已删除 <b>' + deletedCnt + '</b> 条</div>' : '');
-    }
-
-    updateSeedTip();
-
-    var box = $('parentalList');
-    if (!list.length) {
-      var hint = '还没有育儿假记录，添加第一条吧';
-      if (all.length) {
-        var parts = [];
-        if (deletedCnt && !showDeleted) parts.push(deletedCnt + ' 条已删除（勾选上方「显示已删除」查看）');
-        if (handledCnt && !showHandled) parts.push(handledCnt + ' 条已处理（勾选上方「显示已处理」查看）');
-        if (parts.length) hint = '当前没有可显示的记录：有 ' + parts.join('；');
-      }
-      box.innerHTML = emptyState('🍼', hint);
-      return;
-    }
-
-    box.innerHTML = list.map(function (p) {
-      var st = parentalStatus(p);
-      var meta = [];
-      if (p.dept1) meta.push('<span class="pl-dept">一级部门 · ' + esc(p.dept1) + '</span>');
-      if (p.dept2) meta.push('<span class="pl-dept">二级部门 · ' + esc(p.dept2) + '</span>');
-      if (p.applyDate) meta.push('<span>申请 ' + esc(p.applyDate) + '</span>');
-      if (p.birthDate) meta.push('<span>出生 ' + esc(p.birthDate) + '</span>');
-      var stages = [];
-      if (p.p01) stages.push('<span>0-1周岁 · ' + esc(p.p01) + '</span>');
-      if (p.p12) stages.push('<span>1-2周岁 · ' + esc(p.p12) + '</span>');
-      if (p.p23) stages.push('<span>2-3周岁 · ' + esc(p.p23) + '</span>');
-      var ops = p.deleted
-        ? '<button class="btn ghost sm pl-restore-btn" data-act="restore-parental" data-id="' + p.id + '" title="恢复到列表">↩️ 恢复</button>'
-        : ('<button class="icon-btn" data-act="mark-parental" data-id="' + p.id + '" title="' + (p.handled ? '撤销已处理' : '标记已处理') + '">' + (p.handled ? '↩️' : '✅') + '</button>' +
-           '<button class="icon-btn" data-act="edit" data-mod="parental" data-id="' + p.id + '" title="编辑">✏️</button>' +
-           '<button class="icon-btn" data-act="del-parental" data-id="' + p.id + '" title="移入已删除（可在「显示已删除」中恢复）">🗑️</button>');
-      return '<div class="pl-card ' + st.cls + '" data-id="' + p.id + '">' +
-          '<div class="pl-head">' +
-            '<span class="pl-name">' + esc(p.name) + '</span>' +
-            '<span class="pl-pill ' + st.cls + '">' + st.text + '</span>' +
-            '<span class="pl-ops">' + ops + '</span>' +
-          '</div>' +
-          (meta.length ? '<div class="pl-meta">' + meta.join('') + '</div>' : '') +
-          '<div class="pl-due-line">到期日期：<span class="pl-due-val">' + (p.dueDate ? esc(p.dueDate) : '未填写') + '</span></div>' +
-          (stages.length ? '<div class="pl-stages">' + stages.join('') + '</div>' : '') +
-          (p.note ? '<div class="pl-note">💬 ' + esc(p.note) + '</div>' : '') +
-        '</div>';
-    }).join('');
-  }
-  function submitParental() {
-    var name = $('pl-name').value.trim();
-    var due = $('pl-due').value;
-    if (!name) { toast('请填写姓名', 'err'); return; }
-    if (!due) { toast('请选择到期日期', 'err'); return; }
-    var rec = {
-      name: name,
-      dept1: $('pl-dept1').value.trim(),
-      dept2: $('pl-dept2').value.trim(),
-      applyDate: $('pl-apply').value,
-      birthDate: $('pl-birth').value,
-      p01: $('pl-p01').value, p12: $('pl-p12').value, p23: $('pl-p23').value,
-      dueDate: due, note: $('pl-note').value.trim()
-    };
-    if (editing.parental) {
-      var i = state.parental.findIndex(function (x) { return x.id === editing.parental; });
-      if (i >= 0) state.parental[i] = Object.assign(state.parental[i], rec, { id: editing.parental });
-      cancelEdit('parental');
-    } else {
-      rec.id = uid(); rec.handled = false; rec.handledAt = '';
-      rec.deleted = false; rec.deletedAt = '';
-      state.parental.push(rec);
-      flashOk($('pl-submit'));
-    }
-    saveState(); clearForm('parental'); renderParental(); renderOverview();
-  }
-  function markParental(id) {
-    var p = (state.parental || []).find(function (x) { return x.id === id; });
-    if (!p) return;
-    p.handled = !p.handled;
-    p.handledAt = p.handled ? TODAY : '';
-    saveState(); renderParental(); renderOverview();
-    toast(p.handled ? '已标记为已处理' : '已撤销处理标记', 'ok');
-  }
-  // 软删除：只打标记、不真删数据，勾选「显示已删除」即可查看并恢复
-  function deleteParental(id) {
-    var p = (state.parental || []).find(function (x) { return x.id === id; });
-    if (!p) return;
-    if (!confirmDel('移入「已删除」？之后可勾选工具栏的「显示已删除」查看并恢复。')) return;
-    p.deleted = true;
-    p.deletedAt = TODAY;
-    saveState(); renderParental(); renderOverview();
-    toast('已移入「已删除」，可勾选「显示已删除」恢复', 'ok');
-  }
-  function restoreParental(id) {
-    var p = (state.parental || []).find(function (x) { return x.id === id; });
-    if (!p) return;
-    p.deleted = false;
-    p.deletedAt = '';
-    saveState(); renderParental(); renderOverview();
-    toast('已恢复到列表', 'ok');
-  }
-  // 依据「申请日期 + 出生日期」自动推算三个阶段的区间（只填空缺，不覆盖手填值）
-  // 规则（由公司表格 24 条数据反推并逐条验证）：
-  //   第 N 阶段截止 = 出生日期 + N 年 - 1 天
-  //   第 N 阶段起点 = max(申请日期, 出生日期 + (N-1) 年)
-  //   仅当「起点 <= 截止」且「起点 <= 今天」（该阶段已开始）才填入
-  //   到期日期 = 最后一个「已开始」阶段的截止日（不是固定第 3 阶段）
-  function autoFillParentalStages() {
-    var b = $('pl-birth').value;
-    if (!b) return;
-    var bd = new Date(b + 'T00:00:00');
-    if (isNaN(bd.getTime())) return;
-    var aRaw = $('pl-apply').value || TODAY;
-    var aDate = new Date(aRaw + 'T00:00:00');
-    if (isNaN(aDate.getTime())) aDate = new Date(bd.getTime());
-    var todayDate = new Date(TODAY + 'T00:00:00');
-    function shift(y, offDays) {
-      var d = new Date(bd.getTime());
-      d.setFullYear(d.getFullYear() + y);
-      d.setDate(d.getDate() + offDays);
-      return d;
-    }
-    function disp(d) { return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()); }
-    function laterOf(d1, d2) { return d1.getTime() >= d2.getTime() ? d1 : d2; }
-    var plan = [
-      { id: 'pl-p01', from: aDate, to: shift(1, -1) },
-      { id: 'pl-p12', from: laterOf(aDate, shift(1, 0)), to: shift(2, -1) },
-      { id: 'pl-p23', from: laterOf(aDate, shift(2, 0)), to: shift(3, -1) }
-    ];
-    var lastEnd = null;
-    plan.forEach(function (it) {
-      if (it.from.getTime() > it.to.getTime() || it.from.getTime() > todayDate.getTime()) return;
-      lastEnd = it.to;   // 已开始的阶段，依次覆盖 → 最终留下最后一个已开始阶段
-      var el = $(it.id);
-      if (el && !el.value) el.value = disp(it.from) + '-' + disp(it.to);
-    });
-    if ($('pl-due') && !$('pl-due').value && lastEnd) $('pl-due').value = fmtDate(lastEnd);
-  }
-
-  /* 内置初始数据同步（来自 parental_seed.js）
-     以「姓名 + 出生日期」为唯一键：
-       · 键已存在 → 用表格的值更新该记录（**保留**页面上的「提示栏」与「已处理」标记）
-       · 键不存在 → 新增记录
-     version 未变化时跳过，所以不会每次刷新都重写。
-     force=true 忽略 version，供「同步内置数据」按钮手动触发。 */
-  var DEFAULT_SEED_COLS = ['name', 'dept1', 'dept2', 'applyDate', 'birthDate', 'p01', 'p12', 'p23', 'dueDate'];
-  function parentalSeedInfo() {
-    var s = window.PARENTAL_SEED;
-    return (s && s.rows && s.rows.length) ? { total: s.rows.length, version: s.version } : null;
-  }
-  function importParentalSeed(force) {
-    try {
-      var seed = window.PARENTAL_SEED;
-      if (!seed || !seed.rows || !seed.rows.length) return { ok: false, added: 0, updated: 0, total: 0 };
-      if (!force && state.parentalSeedVersion === seed.version) {
-        return { ok: true, added: 0, updated: 0, total: seed.rows.length, skipped: true };
-      }
-      var cols = seed.cols || DEFAULT_SEED_COLS;
-      var byKey = {};
-      (state.parental || []).forEach(function (p) { byKey[(p.name || '') + '|' + (p.birthDate || '')] = p; });
-      var added = 0, updated = 0;
-      seed.rows.forEach(function (row) {
-        var rec = {}, i, j, k, old;
-        for (i = 0; i < cols.length; i++) rec[cols[i]] = row[i] || '';
-        if (!rec.name) return;
-        k = rec.name + '|' + rec.birthDate;
-        old = byKey[k];
-        if (old) {
-          for (j = 0; j < cols.length; j++) {
-            if (cols[j] === 'note') continue;      // 提示栏由页面自己维护，不覆盖
-            old[cols[j]] = rec[cols[j]];
-          }
-          updated++;
-        } else {
-          rec.id = uid(); rec.handled = false; rec.handledAt = '';
-          rec.deleted = false; rec.deletedAt = '';
-          if (rec.note === undefined) rec.note = '';
-          state.parental.push(rec);
-          byKey[k] = rec;
-          added++;
-        }
-      });
-      state.parentalSeedVersion = seed.version;
-      saveState();
-      return { ok: true, added: added, updated: updated, total: seed.rows.length };
-    } catch (e) { console.warn('育儿假初始数据同步失败:', e); return { ok: false, added: 0, updated: 0, total: 0 }; }
-  }
-  var plSeedRetried = false;
-  function applyParentalSeed() {
-    var r = importParentalSeed(false);
-    if (!r.ok && !plSeedRetried) {
-      // 内置数据脚本可能还在路上（首次部署时 CDN 传播有延迟），1.5 秒后补一次
-      plSeedRetried = true;
-      setTimeout(function () {
-        var r2 = importParentalSeed(false);
-        if (r2.ok && (r2.added || r2.updated)) {
-          renderParental(); renderOverview();
-          if (r2.added) toast('已导入 ' + r2.added + ' 条育儿假记录', 'ok');
-        }
-        updateSeedTip();
-      }, 1500);
-    }
-    return r;
-  }
-  // 工具栏上的「内置数据」状态提示
-  function updateSeedTip() {
-    var tip = $('plSeedTip');
-    if (!tip) return;
-    var info = parentalSeedInfo();
-    if (!info) { tip.textContent = '⚠ 内置数据未加载，请刷新页面'; return; }
-    tip.textContent = '内置 ' + info.total + ' 条 · ' + (state.parentalSeedVersion === info.version ? '已同步' : '待同步');
-  }
-
   /* ============ 列表项 HTML & 通用删除/编辑 ============ */
   function itemHTML(id, mod, head, line2) {
     return '<div class="item" data-id="' + id + '">' +
@@ -4154,7 +3877,7 @@
   function emptyState(em, text) { return '<div class="empty"><span class="em">' + em + '</span>' + text + '</div>'; }
 
   function fillForm(mod, rec) {
-    var map = { exercise: 'e', meal: 'm', weight: 'w', finance: 'f', plan: 'p', todo: 't', pending: 'pf', travel: 'tr', parental: 'pl' };
+    var map = { exercise: 'e', meal: 'm', weight: 'w', finance: 'f', plan: 'p', todo: 't', pending: 'pf', travel: 'tr' };
     var p = map[mod];
     if (mod === 'exercise') {
       $('e-date').value = rec.date; $('e-type').value = rec.type; $('e-duration').value = rec.duration;
@@ -4173,15 +3896,10 @@
     } else if (mod === 'travel') {
       $('tr-dest').value = rec.destination; $('tr-start').value = rec.startDate; $('tr-end').value = rec.endDate;
       $('tr-companion').value = rec.companion || ''; $('tr-cost').value = rec.cost || ''; $('tr-note').value = rec.note || '';
-    } else if (mod === 'parental') {
-      $('pl-name').value = rec.name || ''; $('pl-dept1').value = rec.dept1 || ''; $('pl-dept2').value = rec.dept2 || '';
-      $('pl-apply').value = rec.applyDate || ''; $('pl-birth').value = rec.birthDate || ''; $('pl-due').value = rec.dueDate || '';
-      $('pl-p01').value = rec.p01 || ''; $('pl-p12').value = rec.p12 || ''; $('pl-p23').value = rec.p23 || '';
-      $('pl-note').value = rec.note || '';
     }
   }
   function clearForm(mod) {
-    var map = { exercise: 'e', meal: 'm', weight: 'w', finance: 'f', plan: 'p', todo: 't', pending: 'pf', travel: 'tr', parental: 'pl' };
+    var map = { exercise: 'e', meal: 'm', weight: 'w', finance: 'f', plan: 'p', todo: 't', pending: 'pf', travel: 'tr' };
     var p = map[mod];
     var ids = {
       e: ['e-date', 'e-duration', 'e-calories', 'e-feeling'],
@@ -4189,14 +3907,12 @@
       f: ['f-date', 'f-amount', 'f-note'], p: ['p-time', 'p-content'],
       t: ['t-due', 't-content', 't-project'],
       pf: ['pf-content', 'pf-assignee', 'pf-note'],
-      tr: ['tr-dest', 'tr-companion', 'tr-cost', 'tr-note'],
-      pl: ['pl-name', 'pl-dept1', 'pl-dept2', 'pl-apply', 'pl-birth', 'pl-due', 'pl-p01', 'pl-p12', 'pl-p23', 'pl-note']
+      tr: ['tr-dest', 'tr-companion', 'tr-cost', 'tr-note']
     }[p];
     ids.forEach(function (id) { if ($(id)) $(id).value = ''; });
     // 日期字段重置为今天
     if ($('e-date')) $('e-date').value = TODAY;
     if ($('f-date')) $('f-date').value = TODAY;
-    if ($('pl-apply')) $('pl-apply').value = TODAY;
   }
   function deleteRec(mod, id) {
     if (!confirmDel()) return;
@@ -4205,7 +3921,7 @@
   }
   function rerender(mod) {
     ({ reading: renderReading, exercise: renderExercise, meal: renderMeal, weight: renderWeight,
-      finance: renderFinance, todo: renderTodo, travel: renderTravel, parental: renderParental })[mod]();
+      finance: renderFinance, todo: renderTodo, travel: renderTravel })[mod]();
   }
 
   /* ============ 农历（总览日期头用） ============ */
@@ -4328,12 +4044,9 @@
     var rGoal = state.readingGoal || 24;
 
     var pendingCount = (state.pending || []).filter(function (p) { return !p.done; }).length;
-    var plAlerts = parentalAlerts();
-    var plExpired = plAlerts.filter(function (p) { return daysUntil(p.dueDate) < 0; }).length;
 
     var cells = [
       { k: '待办待放', v: todos.length + ' 项待办 / ' + pendingCount + ' 项待放' },
-      { k: '育儿假待更新', v: plAlerts.length + ' 人' },
       { k: '今年已读', v: rDone + ' / ' + rGoal + ' 本' },
       { k: '今日锻炼', v: eCount + ' 次' },
       { k: '今日吃饭', v: mCount + ' 餐' },
@@ -4343,22 +4056,6 @@
     $('ovGrid').innerHTML = cells.map(function (c) {
       return '<div class="ov-cell"><div class="k">' + c.k + '</div><div class="v">' + esc(c.v) + '</div></div>';
     }).join('');
-
-    // ===== 育儿假提醒（独立保护，出错不影响其他内容） =====
-    try {
-      var plBox = $('ovParentalRemind');
-      if (plBox) {
-        if (plAlerts.length) {
-          plBox.hidden = false;
-          plBox.innerHTML =
-            '<div class="ov-remind-inner">🍼 有 <b>' + plAlerts.length + '</b> 位员工育儿假需更新' +
-            (plExpired ? '（其中 <b class="red">' + plExpired + '</b> 位已过期）' : '') + '</div>' +
-            '<button class="btn ghost sm" data-act="go-parental">去查看 →</button>';
-        } else {
-          plBox.hidden = true; plBox.innerHTML = '';
-        }
-      }
-    } catch (e) { console.warn('育儿假提醒渲染跳过:', e); }
   }
 
   /* ============ 导出 / 导入 ============ */
@@ -4414,12 +4111,11 @@
     $('t-submit').addEventListener('click', submitTodo);
     $('pf-submit').addEventListener('click', submitPending);
     $('tr-submit').addEventListener('click', submitTravel);
-    $('pl-submit').addEventListener('click', submitParental);
 
     // 取消编辑
-    ['e', 'm', 'w', 'f', 't', 'pf', 'tr', 'pl'].forEach(function (p) {
+    ['e', 'm', 'w', 'f', 't', 'pf', 'tr'].forEach(function (p) {
       var c = $(p + '-cancel'); if (c) c.addEventListener('click', function () {
-        var mod = { r: 'reading', e: 'exercise', m: 'meal', w: 'weight', f: 'finance', t: 'todo', pf: 'pending', tr: 'travel', pl: 'parental' }[p];
+        var mod = { r: 'reading', e: 'exercise', m: 'meal', w: 'weight', f: 'finance', t: 'todo', pf: 'pending', tr: 'travel' }[p];
         cancelEdit(mod); clearForm(mod);
       });
     });
@@ -4441,11 +4137,6 @@
       if (act === 'chore-set') { openChoreMemberModal(); return; }
       // 待放计划专属 action
       if (act === 'toggle-pending') { togglePending(btn.getAttribute('data-id')); return; }
-      // 育儿假专属 action
-      if (act === 'mark-parental') { markParental(btn.getAttribute('data-id')); return; }
-      if (act === 'del-parental') { deleteParental(btn.getAttribute('data-id')); return; }
-      if (act === 'restore-parental') { restoreParental(btn.getAttribute('data-id')); return; }
-      if (act === 'go-parental') { goPanel('parental'); return; }
       if (act === 'edit-pending') { startEditPending(btn.getAttribute('data-id')); return; }
       if (act === 'del-pending') { deletePending(btn.getAttribute('data-id')); return; }
       var mod = btn.getAttribute('data-mod');
@@ -4484,25 +4175,13 @@
     // 历史/归档开关
     $('tShowArchived').addEventListener('change', renderTodo);
 
-    // 育儿假：显示已处理开关 + 出生日期自动推算阶段区间 + 手动同步内置数据
-    $('plShowHandled').addEventListener('change', renderParental);
-    $('plShowDeleted').addEventListener('change', renderParental);
-    $('pl-birth').addEventListener('change', autoFillParentalStages);
-    $('plSeedBtn').addEventListener('click', function () {
-      var r = importParentalSeed(true);
-      if (!r.ok) { toast('内置数据未加载，请刷新页面后重试', 'err'); return; }
-      renderParental(); renderOverview();
-      if (r.added || r.updated) toast('同步完成：新增 ' + r.added + ' 条，更新 ' + r.updated + ' 条', 'ok');
-      else toast('已是最新，共 ' + r.total + ' 条', 'ok');
-    });
-
     // 导出/导入
     $('exportBtn').addEventListener('click', exportData);
     $('importBtn').addEventListener('click', function () { $('importFile').click(); });
     $('importFile').addEventListener('change', function (e) { if (e.target.files[0]) importData(e.target.files[0]); e.target.value = ''; });
 
     // 设置表单标题默认值
-    ['e', 'm', 'w', 'p', 't', 'pf', 'tr', 'pl'].forEach(function (p) {
+    ['e', 'm', 'w', 'p', 't', 'pf', 'tr'].forEach(function (p) {
       var t = $(p + '-FormTitle'); if (t) t.setAttribute('data-default', t.textContent);
     });
 
@@ -4604,7 +4283,7 @@
 
   function renderAll() {
     renderReading(); renderExercise(); renderMeal(); renderWeight(); renderFinance();
-    renderTodo(); renderPending(); renderTravel(); renderChores(); renderParental(); renderOverview();
+    renderTodo(); renderPending(); renderTravel(); renderChores(); renderOverview();
   }
 
   /* ============ 家务排班（沿用家庭管家排班引擎，成员可配置） ============ */
@@ -4823,12 +4502,10 @@
 
       tickClock(); setInterval(tickClock, 1000);
       bind();
-      var _plSeed = applyParentalSeed();   // 首次加载：同步内置的育儿假初始数据
       renderAll();
       setupDeadlineNotifications();
       goPanel('overview');
       closeModal();
-      if (_plSeed.added) toast('已导入 ' + _plSeed.added + ' 条育儿假记录', 'ok');
     } catch (e) {
       console.error('核心初始化出错：', e);
       hideSplash();
