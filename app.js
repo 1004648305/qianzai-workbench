@@ -1605,11 +1605,37 @@
     ['potato', '土豆', '谷薯', '个', 150, 77, 2.0, 0.2, 17.0, 8, 0.8, 10, 2, 0, 1.1, 27],
     ['yam', '山药', '谷薯', '份', 100, 57, 1.9, 0.2, 12.4, 16, 0.3, 7, 2, 0, 0.8, 5],
     ['dumpling', '饺子', '谷薯', '个', 20, 240, 8.0, 8.0, 33.0, 20, 1.2, 10, 3, 0, 1.0, 1],
+    // —— 中式早餐 / 面点（成品每 100g，馅料与做法差异大，属估算）——
+    ['baozi_pork', '猪肉包子', '谷薯', '个', 80, 227, 7.0, 8.5, 30.0, 20, 1.5, 12, 2, 0, 1.0, 0],
+    ['baozi_veg', '素菜包子', '谷薯', '个', 80, 180, 5.0, 3.5, 33.0, 30, 1.3, 20, 2, 0, 1.8, 2],
+    ['baozi_bean', '豆沙包子', '谷薯', '个', 70, 240, 5.5, 3.0, 48.0, 15, 1.2, 10, 2, 0, 1.2, 0],
+    ['xiaolongbao', '小笼包', '谷薯', '个', 25, 230, 8.0, 10.0, 26.0, 18, 1.4, 10, 3, 0, 0.8, 0],
+    ['huajuan', '花卷', '谷薯', '个', 80, 214, 6.4, 1.0, 45.6, 19, 1.5, 14, 2, 0, 1.2, 0],
+    ['youtiao', '油条', '谷薯', '根', 60, 388, 6.9, 17.6, 51.0, 6, 1.0, 8, 2, 0, 0.8, 0],
+    ['shaobing', '烧饼', '谷薯', '个', 80, 326, 8.0, 10.0, 50.0, 30, 2.0, 12, 2, 0, 1.5, 0],
+    ['eggpancake', '鸡蛋灌饼', '谷薯', '份', 150, 250, 8.0, 11.0, 29.0, 45, 1.8, 25, 5, 20, 1.2, 0],
+    ['huntun', '馄饨', '谷薯', '碗', 200, 180, 6.0, 5.0, 27.0, 25, 1.2, 12, 3, 0, 0.8, 1],
+    ['tangyuan', '汤圆', '谷薯', '个', 20, 250, 4.0, 8.0, 40.0, 12, 0.8, 5, 2, 0, 0.5, 0],
+    ['zongzi', '粽子', '谷薯', '个', 150, 190, 4.0, 3.0, 38.0, 15, 1.2, 8, 2, 0, 0.8, 0],
+    ['cheungfun', '肠粉', '谷薯', '份', 200, 110, 2.5, 1.5, 22.0, 12, 0.5, 5, 2, 0, 0.4, 0],
+    ['riceNoodle', '米粉(熟)', '谷薯', '碗', 200, 110, 2.0, 0.3, 25.0, 8, 0.5, 3, 2, 0, 0.5, 0],
+    ['hotDryNoodle', '热干面', '谷薯', '碗', 200, 250, 7.0, 9.0, 35.0, 60, 2.5, 20, 3, 0, 1.5, 0],
+    ['instantNoodle', '方便面', '谷薯', '包', 100, 470, 9.5, 21.0, 60.0, 25, 2.0, 10, 2, 0, 1.5, 0],
+    ['babaoCongee', '八宝粥', '谷薯', '碗', 250, 85, 2.0, 0.5, 18.0, 12, 0.8, 6, 2, 0, 0.8, 0],
+    ['redbeanCongee', '红豆粥', '谷薯', '碗', 250, 72, 2.2, 0.3, 15.0, 10, 0.9, 8, 2, 0, 1.2, 0],
+    ['steamedDumpling', '蒸饺', '谷薯', '个', 25, 200, 7.0, 7.0, 27.0, 18, 1.2, 10, 3, 0, 0.8, 0],
+    ['shaomai', '烧麦', '谷薯', '个', 30, 220, 7.0, 8.0, 29.0, 16, 1.3, 8, 3, 0, 0.6, 0],
+    ['guotie', '锅贴/生煎', '谷薯', '个', 30, 250, 7.5, 11.0, 29.0, 18, 1.3, 9, 3, 0, 0.7, 0],
+    ['hulatang', '胡辣汤', '谷薯', '碗', 250, 60, 2.0, 1.5, 9.0, 15, 0.8, 6, 2, 0, 0.5, 2],
+    ['cake', '蛋糕', '谷薯', '块', 80, 350, 5.0, 15.0, 48.0, 40, 1.0, 15, 3, 0, 0.5, 0],
+    ['biscuit', '饼干', '谷薯', '份', 30, 430, 7.0, 15.0, 65.0, 30, 1.5, 10, 2, 0, 1.5, 0],
+    ['sesameBall', '麻团', '谷薯', '个', 40, 320, 4.0, 12.0, 48.0, 30, 1.2, 8, 2, 0, 1.0, 0],
 
     // 豆制品
     ['tofu_n', '北豆腐', '豆制品', '份', 100, 98, 12.2, 4.8, 1.5, 138, 1.9, 39, 2, 0, 0.5, 0],
     ['tofu_s', '南豆腐', '豆制品', '份', 100, 57, 6.2, 2.5, 2.4, 116, 1.5, 30, 2, 0, 0.4, 0],
     ['soymilk', '豆浆', '豆制品', '杯', 250, 16, 1.8, 0.7, 1.1, 10, 0.5, 8, 2, 0, 0.2, 0],
+    ['doufunao', '豆腐脑', '豆制品', '碗', 250, 45, 3.0, 1.5, 4.0, 30, 0.6, 12, 2, 0, 0.3, 0],
     ['tofudry', '豆腐干', '豆制品', '份', 50, 140, 16.2, 3.6, 11.0, 308, 4.9, 24, 2, 0, 0.8, 0],
     ['fuzhu', '腐竹', '豆制品', '份', 30, 459, 44.6, 21.7, 22.0, 77, 16.5, 147, 2, 0, 1.0, 0],
     ['edamame', '毛豆', '豆制品', '份', 100, 131, 13.1, 5.0, 10.5, 135, 3.5, 64, 2, 0, 4.0, 27],
@@ -1677,6 +1703,8 @@
     ['yogurt', '酸奶', '蛋奶', '杯', 150, 72, 2.5, 2.7, 9.3, 118, 0.4, 6, 2, 0, 0, 1],
     ['cheese', '奶酪', '蛋奶', '片', 20, 328, 25.7, 23.5, 3.5, 799, 2.4, 30, 10, 0, 0, 0],
     ['duckegg', '鸭蛋', '蛋奶', '个', 60, 180, 12.6, 13.0, 3.1, 62, 2.9, 60, 15, 50, 0, 0],
+    ['teaeegg', '茶叶蛋', '蛋奶', '个', 55, 145, 13.0, 9.0, 2.8, 56, 2.0, 60, 15, 60, 0, 0],
+    ['friedEgg', '煎蛋', '蛋奶', '个', 55, 190, 13.0, 15.0, 1.0, 55, 2.0, 60, 15, 60, 0, 0],
 
     // 坚果
     ['walnut', '核桃', '坚果', '把', 15, 646, 14.9, 58.8, 19.1, 56, 2.7, 98, 2, 0, 9.5, 1],
@@ -1688,7 +1716,8 @@
     // 调味/其他
     ['oil', '植物油', '调味', '勺', 10, 899, 0, 99.9, 0, 9, 0.1, 0, 0, 0, 0, 0],
     ['salt', '加碘盐', '调味', 'g', 1, 0, 0, 0, 0, 24, 0, 0, 2950, 0, 0, 0],
-    ['sugar', '白砂糖', '调味', '勺', 10, 400, 0, 0, 99.9, 20, 0.6, 0, 0, 0, 0, 0]
+    ['sugar', '白砂糖', '调味', '勺', 10, 400, 0, 0, 99.9, 20, 0.6, 0, 0, 0, 0, 0],
+    ['pickles', '榨菜/咸菜', '调味', '份', 30, 25, 1.2, 0.2, 4.5, 40, 1.0, 5, 2, 0, 0.8, 2]
   ];
   var FOOD_MAP = {};
   (function () {
@@ -1701,7 +1730,30 @@
       };
     });
   })();
-  var FOOD_CATS = ['全部', '谷薯', '豆制品', '蔬菜', '水果', '畜禽', '水产', '蛋奶', '坚果', '调味'];
+  // 同义词/口语叫法：搜索时名称匹配不到就用它兜底
+  var FOOD_ALIAS = {
+    xiaolongbao: ['包子', '小笼'], rice: ['白饭'], congee: ['稀饭'], millet: ['小米粥'],
+    noodle: ['挂面', '汤面'], tomato: ['西红柿'], potato: ['马铃薯'], sweetpotato: ['地瓜', '番薯'],
+    bokchoy: ['青菜', '小白菜'], cabbage: ['大白菜'], broccoli: ['花椰菜'], pepper: ['柿子椒'],
+    fungus: ['黑木耳', '木耳'], kelp: ['昆布'], nori: ['海苔'], pumpkin: ['倭瓜'],
+    soymilk: ['豆奶'], milk: ['鲜奶'], yogurt: ['酸牛奶'], cheese: ['芝士', '干酪'],
+    oat: ['麦片'], salmon: ['鲑鱼'], hairtail: ['刀鱼'], shrimp: ['虾仁'],
+    doufunao: ['豆腐花', '豆花'], huntun: ['云吞', '抄手'], tangyuan: ['元宵'],
+    riceNoodle: ['米线', '河粉'], instantNoodle: ['泡面'], babaoCongee: ['腊八粥'],
+    shaomai: ['烧卖'], guotie: ['生煎', '煎饺'], pickles: ['泡菜', '咸菜'],
+    sesameBall: ['芝麻球'], teaeegg: ['卤蛋'], sesame: ['芝麻'], corn: ['苞米']
+  };
+  // 早餐常见项：点「🍳 早餐」时优先展示（含原库里本就常出现在早餐的食材）
+  var BREAKFAST_KEYS = [
+    'baozi_pork', 'baozi_veg', 'baozi_bean', 'xiaolongbao', 'huajuan', 'youtiao',
+    'shaobing', 'eggpancake', 'huntun', 'tangyuan', 'zongzi', 'cheungfun',
+    'riceNoodle', 'hotDryNoodle', 'babaoCongee', 'redbeanCongee', 'steamedDumpling',
+    'shaomai', 'guotie', 'hulatang', 'doufunao', 'teaeegg', 'friedEgg', 'pickles',
+    'cake', 'biscuit', 'sesameBall', 'instantNoodle',
+    'congee', 'millet', 'mantou', 'noodle', 'bread', 'toast', 'oat', 'corn',
+    'sweetpotato', 'purplesweet', 'dumpling', 'soymilk', 'egg', 'milk', 'yogurt', 'cheese'
+  ];
+  var FOOD_CATS = ['全部', '🍳 早餐', '谷薯', '豆制品', '蔬菜', '水果', '畜禽', '水产', '蛋奶', '坚果', '调味'];
 
   /* 孕期推荐摄入量：T/CNSS 015-2022 表6/表7（轻体力活动） */
   var PREG_TARGETS = {
@@ -1974,6 +2026,7 @@
       tipHTML +
       '<div class="nutri-trend"><div class="nutri-trend-title">近 7 日热量</div><div class="mini-bars">' + bars + '</div></div>' +
       '<div class="nutri-disclaimer">数据参考《中国食物成分表》与《中国孕期妇女膳食指南》估算，仅供记录参考；' +
+      '包子、饺子等带馅面点按常见配方估算，不同店家馅料与用油差别较大，数值可能明显偏高或偏低。' +
       '叶酸补充剂、钙铁剂等是否服用请遵医嘱，本表不构成医疗建议。</div>';
   }
 
@@ -1982,11 +2035,19 @@
     editing.meal = id || null;
     var rec = id ? (state.meal || []).find(function (m) { return m.id === id; }) : null;
     var date = rec ? rec.date : (mealDate || TODAY);
-    var mtype = rec ? rec.mealType : (presetMeal || '午餐');
+    // 新增时按当前时段预选餐次，省去每次手动切
+    var autoMeal = (function () {
+      var h = new Date().getHours();
+      if (h >= 5 && h < 10) return '早餐';
+      if (h >= 10 && h < 15) return '午餐';
+      if (h >= 17 && h < 21) return '晚餐';
+      return '加餐';
+    })();
+    var mtype = rec ? rec.mealType : (presetMeal || autoMeal);
     var dish = rec ? (rec.dish || rec.food || '') : '';
     var note = rec ? (rec.note || '') : '';
     mealPick = rec && rec.foods ? rec.foods.map(function (x) { return { k: x.k, q: x.q || 1 }; }) : [];
-    mealPickCat = '全部';
+    mealPickCat = (mtype === '早餐') ? '🍳 早餐' : '全部';
     mealPickKw = '';
 
     $('modalTitle').textContent = rec ? '编辑饮食记录' : '记录一餐';
@@ -2013,6 +2074,11 @@
     renderFpCats();
     renderFpList();
 
+    $('mm-meal').addEventListener('change', function () {
+      mealPickCat = (this.value === '早餐') ? '🍳 早餐' : '全部';
+      mealPickKw = ''; $('fpKw').value = '';
+      renderFpCats(); renderFpList();
+    });
     $('fpKw').addEventListener('input', function () { mealPickKw = this.value.trim(); renderFpList(); });
     $('mmSave').addEventListener('click', saveMeal);
     $('mmCancel').addEventListener('click', function () { closeModal(); });
@@ -2070,8 +2136,12 @@
     var box = $('fpList'); if (!box) return;
     var kw = mealPickKw;
     var list = FOOD_DB.filter(function (r) {
-      if (mealPickCat !== '全部' && r[2] !== mealPickCat) return false;
-      if (kw && r[1].indexOf(kw) === -1) return false;
+      if (mealPickCat === '🍳 早餐') { if (BREAKFAST_KEYS.indexOf(r[0]) === -1) return false; }
+      else if (mealPickCat !== '全部' && r[2] !== mealPickCat) return false;
+      if (kw) {
+        var alias = FOOD_ALIAS[r[0]] || [];
+        if (r[1].indexOf(kw) === -1 && !alias.some(function (a) { return a.indexOf(kw) !== -1; })) return false;
+      }
       return true;
     });
     if (!list.length) { box.innerHTML = '<div class="fp-empty">没找到这个食材</div>'; return; }
