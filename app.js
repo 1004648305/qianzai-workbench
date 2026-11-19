@@ -45,15 +45,16 @@
 
   var state = loadState();
 
-  /* ============ 云端同步（Supabase + 端到端加密） ============
-     数据存到 Supabase 这张表里（始终在线）；写入前会用「同步密码」做 AES-GCM 加密，
-     密钥由密码经 PBKDF2 派生，密码不下发、不存服务器。
+  /* ============ 云端同步（WorkBuddy 云服务 + 端到端加密） ============
+     数据存在 WorkBuddy 云服务的 workbench_state 表里（常驻可用，不会因为闲置被暂停）。
+     写入前会用「同步密码」做 AES-GCM 加密，密钥由密码经 PBKDF2 派生，密码不下发、不存服务器。
      因此：别人即使拿到数据库里的行，看到的也只是密文；必须知道密码才能解密。
-     手机 / 电脑用同一个密码 → 同一把密钥 → 共享同一份数据。忘记密码无法找回。
-     未填写 Supabase 配置时自动降级为「本地模式」，不影响原有本地使用。 */
+     手机 / 电脑用同一个密码 → 同一把密钥 → 共享同一份数据。忘记密码无法找回。 */
   var CloudSync = (function () {
-    var SUPABASE_URL = 'https://phclihevffvwfjyztbyy.supabase.co';  // ← 你的 Supabase 项目 URL
-    var SUPABASE_ANON = 'sb_publishable_P--ScLwg0oSjtjARUaImtg_ru6_TIKY';  // ← 你的 anon public key
+    // ===== WorkBuddy 云服务分配的公开发布配置（可安全放在前端；权限由服务端 Origin 校验）=====
+    var WB_ENDPOINT = 'https://qianzai-workbench.app.workbuddy.host';
+    var WB_PUBLISHABLE_KEY = 'wbpk_OUsoOrQwDKW2BcFtZILdFC_qP4xiWi8eLDCdzr3Rox0ZDPThEhbkzAv';
+    var WB_OAUTH_RELAY = 'https://www.workbuddy.cn/v2/as/genie-baas/oauth';
     var TABLE = 'workbench_state';
     var ROW_ID = 'qianzai_workbench_v1';
     var PASS_KEY = 'qianzai_cloud_pass';
@@ -63,11 +64,23 @@
     var RETRY_DELAYS = [2000, 5000, 10000]; // 重试间隔(ms)
     var retryTimer = null;            // 重试定时器
 
-    function enabled() {
-      return typeof window.supabase !== 'undefined'
-        && SUPABASE_URL && SUPABASE_URL.indexOf('YOUR_') !== 0
-        && SUPABASE_ANON && SUPABASE_ANON.indexOf('YOUR_') !== 0;
+    function sdkReady() {
+      return typeof window.WorkBuddyCloud !== 'undefined'
+        && typeof window.WorkBuddyCloud.createWorkBuddyCloud === 'function';
     }
+    function enabled() { return sdkReady() && !!WB_ENDPOINT && !!WB_PUBLISHABLE_KEY; }
+    // 云端只接受「正式地址」发出的请求（服务端校验 Origin 完全一致）
+    function isOfficialOrigin() { try { return location.origin === WB_ENDPOINT; } catch (e) { return false; } }
+    function getClient() {
+      if (client) return client;
+      client = window.WorkBuddyCloud.createWorkBuddyCloud({
+        endpoint: WB_ENDPOINT,
+        oauthRelayBaseUrl: WB_OAUTH_RELAY,
+        publishableKey: WB_PUBLISHABLE_KEY
+      });
+      return client;
+    }
+    function db() { return getClient().database; }
     function pass() { try { return localStorage.getItem(PASS_KEY) || ''; } catch (e) { return ''; } }
     function setPass(v) { try { localStorage.setItem(PASS_KEY, v); } catch (e) {} }
     function setStatus(txt, cls) {
@@ -144,7 +157,7 @@
       });
     }
     function decryptState(row, password) {
-      var o = JSON.parse(row.data);
+      var o = (row && row.enc) ? row.enc : JSON.parse(row.data);
       var salt = new Uint8Array(b64ToBuf(o.salt));
       var iv = new Uint8Array(b64ToBuf(o.iv));
       var ct = b64ToBuf(o.ct);
@@ -163,9 +176,11 @@
 
     function start() {
       if (!enabled()) { setStatus('本地模式', 'off'); return Promise.resolve(); }
+      // 非正式地址（如旧的 github.io）连不上云端，直接以本机模式运行，避免反复报错
+      if (!isOfficialOrigin()) { setStatus('本机模式', 'off'); return Promise.resolve(); }
       setStatus('连接中…', 'busy');
-      try { client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON); }
-      catch (e) { console.warn('Supabase 初始化失败', e); setStatus('同步失败', 'err'); return Promise.resolve(); }
+      try { getClient(); }
+      catch (e) { console.warn('云服务初始化失败', e); setStatus('同步失败', 'err'); return Promise.resolve(); }
       var p = pass();
       if (p === '__skip__') { setStatus('本地模式', 'off'); return Promise.resolve(); }
       if (!p) return askPass().then(applyPass);
@@ -182,7 +197,7 @@
 
     function pull(first) {
       if (!ready) return Promise.resolve();
-      return client.from(TABLE).select('*').eq('id', ROW_ID).maybeSingle().then(function (res) {
+      return db().from(TABLE).select('*').eq('id', ROW_ID).maybeSingle().then(function (res) {
         if (res.error) {
           console.warn('pull 失败', res.error);
           if (first) { handleSyncFail('连接云端失败，将自动重试…'); }
@@ -254,7 +269,7 @@
       setStatus('同步中…', 'busy');
       state.__syncTs = Date.now();
       return encryptState(state, pw).then(function (enc) {
-        return client.from(TABLE).upsert({ id: ROW_ID, data: JSON.stringify(enc), updated_at: state.__syncTs });
+        return db().from(TABLE).upsert({ id: ROW_ID, data: JSON.stringify(enc), updated_at: state.__syncTs });
       }).then(function (res) {
         if (res.error) {
           console.warn('push 失败', res.error);
@@ -280,13 +295,112 @@
       pull(false).then(function () { if (ready) push(); });
     }
 
-    function enableFromPill() {
-      if (ready) { syncNow(); return; }
-      if (!enabled()) { toast('请先在 app.js 顶部 CloudSync 里填写 Supabase 的 URL 和 anon key', 'warn'); return; }
-      askPass().then(applyPass);
+    /* ---------- 云端面板（同步 + 换地址搬家用的备份导出/导入） ---------- */
+    function openMenu() {
+      var pill = statusEl || $('cloudPill');
+      var statusTxt = pill ? pill.textContent : '—';
+      var onOfficial = isOfficialOrigin();
+      var html = '<p class="muted-tip">当前状态：<b>' + statusTxt + '</b><br>' +
+        '数据先在本机用「同步密码」加密再上传，云端只存密文；手机和电脑用同一个密码即可共享同一份数据。</p>';
+      if (!onOfficial) {
+        html += '<p class="muted-tip" style="color:#c0392b">⚠ 当前地址不是正式地址，连不上云端。<br>' +
+          '正式地址：<b>' + WB_ENDPOINT + '</b><br>' +
+          '需要搬家：先点「导出备份」保存本机数据，再用正式地址打开并「导入备份」。</p>';
+      }
+      html += '<div class="modal-actions" style="flex-wrap:wrap;gap:8px">';
+      if (onOfficial && !ready) html += '<button class="btn primary" id="csConnect">连接云端</button>';
+      if (ready) html += '<button class="btn primary" id="csSync">立即同步</button>';
+      html += '<button class="btn ghost" id="csExport">⬇ 导出备份</button>' +
+        '<button class="btn ghost" id="csImport">⬆ 导入备份</button>' +
+        '<button class="btn ghost" id="csClose">关闭</button></div>' +
+        '<input type="file" id="csFile" accept=".json,application/json" style="display:none" />';
+      $('modalTitle').textContent = '云端同步';
+      $('modalBody').innerHTML = html;
+      if ($('csConnect')) $('csConnect').onclick = function () { closeModal(); askPass().then(applyPass); };
+      if ($('csSync')) $('csSync').onclick = function () { closeModal(); syncNow(); };
+      $('csExport').onclick = exportBackup;
+      $('csImport').onclick = function () { $('csFile').click(); };
+      $('csClose').onclick = function () { closeModal(); };
+      $('csFile').onchange = handleImportFile;
+      showModal();
     }
 
-    return { start: start, schedulePush: schedulePush, syncNow: syncNow, enableFromPill: enableFromPill, isReady: function () { return ready; } };
+    function exportBackup() {
+      var p = pass();
+      if (!p || p === '__skip__') { askPass().then(function (v) { if (v) doExport(v); }); return; }
+      doExport(p);
+    }
+    function doExport(password) {
+      var st = JSON.parse(JSON.stringify(state));
+      delete st.__syncTs;
+      encryptState(st, password).then(function (enc) {
+        var payload = { type: 'qianzai-workbench-backup', v: 1, at: Date.now(), enc: enc };
+        var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+        var d = new Date();
+        var name = '倩崽工作台备份-' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) +
+          '-' + pad(d.getHours()) + pad(d.getMinutes()) + '.json';
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { try { URL.revokeObjectURL(a.href); a.remove(); } catch (e) {} }, 3000);
+        closeModal();
+        toast('备份已导出：' + name, 'ok');
+      }).catch(function (e) {
+        console.warn('导出失败', e);
+        toast('导出失败：请确认是用 https 地址打开的页面', 'err');
+      });
+    }
+
+    function handleImportFile(ev) {
+      var f = ev.target.files && ev.target.files[0];
+      try { ev.target.value = ''; } catch (e) {}
+      if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        var payload = null;
+        try { payload = JSON.parse(String(reader.result || '')); } catch (e) {}
+        if (!payload || payload.type !== 'qianzai-workbench-backup' || !payload.enc) {
+          toast('这不是工作台的备份文件', 'err'); return;
+        }
+        askImportPass(payload);
+      };
+      reader.onerror = function () { toast('读取文件失败', 'err'); };
+      reader.readAsText(f);
+    }
+
+    function askImportPass(payload) {
+      var guess = pass(); if (guess === '__skip__') guess = '';
+      $('modalTitle').textContent = '导入备份';
+      $('modalBody').innerHTML =
+        '<p class="muted-tip">备份文件是加密的，请输入<b>导出时用的同步密码</b>。' +
+        '恢复后会覆盖本机当前数据。</p>' +
+        '<label>同步密码<input type="password" id="csImpPass" autocomplete="off" /></label>' +
+        '<div class="modal-actions"><button class="btn primary" id="csImpOk">解密并恢复</button>' +
+        '<button class="btn ghost" id="csImpCancel">取消</button></div>';
+      if (guess) $('csImpPass').value = guess;
+      $('csImpOk').onclick = function () {
+        var v = $('csImpPass').value.trim();
+        if (!v) { toast('请输入密码', 'err'); return; }
+        decryptState(payload, v).then(function (s) {
+          s = fillDefaults(s);
+          s.__syncTs = Date.now();
+          setPass(v); pw = v; ready = isOfficialOrigin();
+          suppress = true; state = s; saveState(); suppress = false;
+          renderAll(); closeModal();
+          toast('备份已恢复', 'ok');
+          if (ready) { setStatus('同步中…', 'busy'); push(); }
+        }).catch(function () { toast('密码不对，解密失败', 'err'); });
+      };
+      $('csImpCancel').onclick = function () { closeModal(); };
+      showModal();
+    }
+
+    function enableFromPill() { openMenu(); }
+
+    return { start: start, schedulePush: schedulePush, syncNow: syncNow, openMenu: openMenu,
+      enableFromPill: enableFromPill, isReady: function () { return ready; } };
   })();
 
   /* ============ 工具函数 ============ */
