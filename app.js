@@ -2016,6 +2016,7 @@
     $('fpKw').addEventListener('input', function () { mealPickKw = this.value.trim(); renderFpList(); });
     $('mmSave').addEventListener('click', saveMeal);
     $('mmCancel').addEventListener('click', function () { closeModal(); });
+    showModal();
   }
 
   function renderFpChosen() {
@@ -2140,6 +2141,7 @@
       toast('已保存孕期设置', 'ok');
     });
     $('pgCancel').addEventListener('click', function () { closeModal(); });
+    showModal();
   }
 
   /* ============ 模块4：体重管理 ============ */
